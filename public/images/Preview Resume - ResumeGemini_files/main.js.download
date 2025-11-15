@@ -1,0 +1,425 @@
+﻿(function ($, Builder) {
+    var selectors = {
+        section: "[data-section]",
+        subSection: "[data-sub-section]",
+        documentData: "[data-field]",
+        editUrl: "[data-edit-url]",
+        addSubSectionUrl: "[data-add-sub-section-url]"
+    }
+    var attributes = {
+        name: "data-name",
+        sortIndex: "data-sort-index",
+        id: "data-id"
+    }
+    var trackedSection = null;
+    var browserRepo = {
+        store: window.sessionStorage,
+        allDocKey: "_all_docs_",
+        docKeyPrefix: "doc_",
+        cacheInMin: 100,
+        isStorageAvailable: function () {
+            if (typeof this.hasStorage === "undefined") {
+                try {
+                    var verify = "verify";
+                    if (this.store) {
+                        this.store.setItem(verify, "1");
+                        this.store.removeItem(verify);
+                        this.hasStorage = true;
+                    } else {
+                        this.hasStorage = false;
+                    }
+                } catch (error) {
+                    this.hasStorage = false;
+                }
+            }
+            return this.hasStorage;
+        },
+        get: function (name) {
+            if (this.isStorageAvailable() === true) {
+                var key = this.allDocKey;
+                var docKey = this.docKeyPrefix + Builder.Data.Get("DocumentId");
+                var docStr = this.store.getItem(key);
+                if (docStr) {
+                    var docs = JSON.parse(docStr);
+                    if (docs && docs.timestamp) {
+                        var timestamp = (new Date()).getTime();
+                        if (docs.timestamp > timestamp && docs.packageId == Builder.Data.Get("PackageId")) {
+                            if (docs.data[docKey]) {
+                                if (Builder.Data.Get("ValidateSubSection")) {
+                                    var section = docs.data[docKey][name];
+                                    if (section && section.subSections) {
+                                        for (var m = 0, len = section.subSections.length; m < len; m++) {
+                                            if (Builder.Data.Get("SubSectionId") == section.subSections[m].id) {
+                                                return section;
+                                            }
+                                        }
+                                        /// Clear the stale data.
+                                        this.store.removeItem(key);
+                                    }
+                                } else {
+                                    return docs.data[docKey][name];
+                                }
+                            }
+                        } else {
+                            /// Clear the stale data.
+                            this.store.removeItem(key);
+                        }
+                    }
+                }
+            }
+            return null;
+        },
+        set: function (name, data) {
+            if (this.isStorageAvailable() === true && name && data) {
+                var key = this.allDocKey;
+                var docKey = this.docKeyPrefix + Builder.Data.Get("DocumentId");
+                var timestamp = new Date(new Date().getTime() + this.cacheInMin * 60000).getTime();
+                var docs = null;
+                var docStr = this.store.getItem(key);
+                if (docStr) {
+                    docs = JSON.parse(docStr);
+                }
+                if (!docs) {
+                    docs = {};
+                }
+                if (!docs.data) {
+                    docs.data = {};
+                }
+                if (!docs.data[docKey]) {
+                    docs.data[docKey] = {};
+                }
+                docs.data[docKey][name] = data;
+                docs.packageId = Builder.Data.Get("PackageId");
+                docs.timestamp = timestamp;
+                this.store.setItem(key, JSON.stringify(docs));
+                return true;
+            }
+            return false;
+        },
+        remove: function (docId) {
+            if (this.isStorageAvailable() === true) {
+                this.set(docId, null);
+            }
+        }
+    };
+
+    function getValue($documentData) {
+        if ($documentData.is("[data-is-editor]")) {
+            return Builder.Editor.GetContent($documentData.attr("id"));
+        } else {
+            return $documentData.val();
+        }
+    }
+    function setValue($documentData, value) {
+        if ($documentData.is("[data-text-field]")) {
+            $documentData.text(value);
+        } else if($documentData.is("[data-html-field]")) {
+            $documentData.html(value);
+        } else if ($documentData.is("[data-is-editor]")) {
+            Builder.Editor.SetContent($documentData.attr("id"), value);
+        } else {
+            $documentData.val(value);
+        }
+    }
+
+    function getSection() {
+        var $section = $(selectors.section);
+        var section = {
+            id: parseInt($section.attr(attributes.id)),
+            sortIndex: parseInt($section.attr(attributes.sortIndex)),
+            name: $section.attr(attributes.name),
+            subSections: []
+        }
+        $section.find(selectors.subSection).each(function () {
+            var $subSection = $(this);
+            var subSection = {
+                id: parseInt($subSection.attr(attributes.id)),
+                sortIndex: parseInt($subSection.attr(attributes.sortIndex)),
+                documentDatas: []
+            };
+            $subSection.find(selectors.documentData).each(function () {
+                var $documentData = $(this);
+                subSection.documentDatas.push({
+                    id: parseInt($documentData.attr(attributes.id)),
+                    name: $documentData.attr(attributes.name),
+                    value: getValue($documentData)
+                });
+            });
+            section.subSections.push(subSection);
+        });
+        return section;
+    }
+    function setSection(section) {
+        var $section = $(selectors.section);
+        $section.attr(attributes.id, section.id);
+        $section.attr(attributes.name, section.name);
+        if (section.addSubSectionAddress) {
+            $section.find(selectors.addSubSectionUrl).prop("href", section.addSubSectionAddress);
+        }
+        if (section.subSections && section.subSections.length) {
+            $section.find(selectors.subSection).each(function (index, item) {
+                if (section.subSections.length > index) {
+                    var subSection = null;
+                    if (Builder.Data.Get("ValidateSubSection")) {
+                        for (var m = 0, len = section.subSections.length; m < len; m++) {
+                            if (Builder.Data.Get("SubSectionId") == section.subSections[m].id) {
+                                subSection = section.subSections[m];
+                                break;
+                            }
+                        }
+                    } else {
+                        subSection = section.subSections[index];
+                    }
+                    if (subSection) {
+                        var $item = $(item).attr(attributes.id, subSection.id).attr(attributes.sortIndex, subSection.sortIndex);
+                        if (subSection.editAddress) {
+                            $item.find(selectors.editUrl).prop("href", subSection.editAddress);
+                        }
+                        if (subSection.documentDatas && subSection.documentDatas.length) {
+                            $item.find(selectors.documentData).each(function () {
+                                var $documentData = $(this);
+                                var name = $documentData.attr(attributes.name);
+                                for (var i = 0, len = subSection.documentDatas.length; i < len; i++) {
+                                    if (subSection.documentDatas[i].name === name) {
+                                        $documentData.attr(attributes.id, subSection.documentDatas[i].id);
+                                        setValue($documentData, subSection.documentDatas[i].value);
+                                        break;
+                                    }
+                                }
+                            });
+                        }
+                    }
+                }
+            });
+        }
+    }
+    function sectionEquals(section1, section2) {
+        if (section1 && section2 && section1.subSections && section2.subSections && section1.subSections.length == section2.subSections.length) {
+            for (var i = 0, subSectionLen = section1.subSections.length; i < subSectionLen; i++) {
+                if (section1.subSections[i].documentDatas && section2.subSections[i].documentDatas && section1.subSections[i].documentDatas.length == section2.subSections[i].documentDatas.length) {
+                    for (var j = 0, ddLen = section1.subSections[i].documentDatas.length; j < ddLen; j++) {
+                        if (section1.subSections[i].documentDatas[j].value !== section2.subSections[i].documentDatas[j].value) {
+                            return false;
+                        }
+                    }
+                } else {
+                    return false;
+                }
+            }
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+    function getSortedSection() {
+        var $section = $(selectors.section);
+        var section = {
+            id: parseInt($section.attr(attributes.id)),
+            sortIndex: parseInt($section.attr(attributes.sortIndex)),
+            name: $section.attr(attributes.name),
+            subSections: []
+        }
+        $section.find(selectors.subSection).each(function (index, item) {
+            var $subSection = $(item);
+            if (index != $subSection.attr(attributes.sortIndex)) {
+                var subSection = {
+                    id: parseInt($subSection.attr(attributes.id)),
+                    sortIndex: parseInt($subSection.attr(attributes.sortIndex))
+                };
+                subSection.sortIndex = index;
+                section.subSections.push(subSection);
+            }
+        });
+        return section;
+    }
+    function setSortedSection(section) {
+        var $section = $(selectors.section);
+        if (section.subSections && section.subSections.length) {
+            $section.find(selectors.subSection).each(function () {
+                var $this = $(this);
+                for (var i = 0, len = section.subSections.length; i < len; i++) {
+                    if ($this.attr(attributes.id) == section.subSections[i].id) {
+                        $this.attr(attributes.sortIndex, section.subSections[i].sortIndex);
+                        break;
+                    }
+                }
+            });
+        }
+    }
+
+    function loadSection() {
+        if (Builder.Data.Get("LoadData")) {
+            var name = $(selectors.section).attr(attributes.name);
+            var storedSection = browserRepo.get(name);
+            if (storedSection) {
+                setSection(storedSection);
+                trackedSection = getSection();
+            } else {
+                Builder.Http.Get({ url: Builder.Data.Get("GetSectionAddress") }).done(function (section) {
+                    setSection(section);
+                    trackedSection = section;
+                    browserRepo.set(name, section);
+                });
+            }
+        }
+    }
+    function saveSection() {
+        var name = $(selectors.section).attr(attributes.name);
+        var section = getSection();
+        if (!sectionEquals(section, trackedSection)) {
+            Builder.Http.Post({ url: Builder.Data.Get("SaveSectionAddress"), data: section }).done(function (savedSection) {
+                browserRepo.set(name, savedSection);
+                gotoNextRoute(savedSection);
+            });
+        } else {
+            gotoNextRoute();
+        }
+    }
+    function sortSubSections() {
+        var name = $(selectors.section).attr(attributes.name);
+        var section = getSortedSection();
+        if (section && section.id > 0 && section.subSections.length) {
+            Builder.Http.Post({ url: Builder.Data.Get("SortSubSectionsAddress"), data: section }).done(function (savedSection) {
+                if (savedSection && savedSection.subSections) {
+                    var storedSection = browserRepo.get(name);
+                    if (storedSection && storedSection.subSections) {
+                        for (var s = 0, sLen = storedSection.subSections.length; s < sLen; s++) {
+                            for (var n = 0, nLen = savedSection.subSections.length; n < nLen; n++) {
+                                if (storedSection.subSections[s].id == savedSection.subSections[n].id) {
+                                    storedSection.subSections[s].sortIndex = savedSection.subSections[n].sortIndex;
+                                    break;
+                                }
+                            }
+                        }
+                        setSortedSection(savedSection);
+                        browserRepo.set(name, storedSection);
+                    }
+                }
+            });
+        }
+    }
+
+    function gotoNextRoute(savedSection) {
+        if (savedSection && savedSection.subSections && savedSection.subSections.length && Builder.Data.Get("ReviewRouteUrl")) {
+            location.href = Builder.Data.Get("ReviewRouteUrl");
+        } else {
+            location.href = Builder.Data.Get("NextRouteAddress");
+        }
+    }
+
+    function accordian() {
+        $("[data-accordian-title]").on("click", function () {
+            $(this).find("i").toggleClass("on");
+            var acc = $(this).attr("data-accordian-title");
+            $("[data-accordian-container=" + acc + "]").toggleClass("collapsedAdvice expandedAdvice");
+        });
+    }
+
+    function setAutoTitleCase() {
+        const inputElements = document.querySelectorAll('.auto-title-case');
+        inputElements.forEach(input => {
+            input.addEventListener('input', () => convertToTitleCase(input));
+        });
+    }
+
+    function convertToTitleCase(input) {
+        const words = input.value.split(' ');
+        const capitalizedWords = words.map(word => {
+            if (word.length > 0 && !isAbbreviation(word)) {
+                return word[0].toUpperCase() + word.slice(1).toLowerCase();
+            }
+            return word;
+        });
+        input.value = capitalizedWords.join(' ');
+    }
+
+    function isAbbreviation(word) {
+        if (word.toUpperCase() === word) {
+            return true;
+        }
+        const parts = word.split(".");
+        for (const part of parts) {
+            if (part.toUpperCase() !== part) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    function toggleRenameSectionControls(isEditing) {
+        if (isEditing) {
+            $("#btnRenameSection, #textSectionName").addClass("hide");
+            $("#inputRenameSection, #btnRenameSectionSave, #btnRenameSectionCancel").removeClass("hide");
+        } else {
+            $("#btnRenameSection, #textSectionName").removeClass("hide");
+            $("#inputRenameSection, #btnRenameSectionSave, #btnRenameSectionCancel").addClass("hide");
+        }
+    }
+
+    function updateSectionLabelAndWizardMenu(wizard, updatedSectionLabel) {
+        $('#textSectionName').text(updatedSectionLabel);
+        $(".data-sideMenu").each(function () {
+            if ($(this).data("sectioncode") === wizard.toLowerCase()) {
+                $(this).text(updatedSectionLabel);
+            }
+        });
+    }
+
+    $(function () {
+        loadSection();
+        Builder.Funnel = {
+            "SaveSection": saveSection,
+            "SortSubSections": sortSubSections
+        };
+        accordian();
+
+        const sideMenuItems = document.querySelectorAll('.sideList li');
+        sideMenuItems.forEach(item => {
+            item.addEventListener('click', event => {
+                event.preventDefault();
+                const href = item.querySelector('a').href;
+                window.location.href = href;
+            });
+        });
+
+        setAutoTitleCase();
+
+        $("#btnRenameSection").click(function () {
+            toggleRenameSectionControls(true);
+        });
+
+        $("#btnRenameSectionSave").click(function (e) {
+            if (e && e.preventDefault) {
+                e.preventDefault();
+            }
+            var wizard = $("#btnRenameSectionSave").data("wizard");
+            var isSectionExist = $("#btnRenameSectionSave").data("sectionexist");
+            var sectionTypeCD = $("#btnRenameSectionSave").data("sectiontypecd");
+            var updatedSectionLabel = $('#inputRenameSection').val();
+            if (!updatedSectionLabel) {
+                $('#inputRenameSection').val($('#textSectionName').text()); 
+                toggleRenameSectionControls(false);
+                return;
+            }
+            if (isSectionExist) {
+                Builder.Http.Post({ url: Builder.Data.Get("RenameSectionUrl"), data: { "docId": Builder.Data.Get("DocumentId"), "sectionTypeCD": sectionTypeCD, "sectionLabel": updatedSectionLabel, "wizard": wizard } })
+                    .done(function (data) {
+                        if (data) {
+                            updateSectionLabelAndWizardMenu(wizard, updatedSectionLabel);
+                        }
+                    }).always(function () {
+                        toggleRenameSectionControls(false);
+                    });
+            } else {
+                updateSectionLabelAndWizardMenu(wizard, updatedSectionLabel);
+                toggleRenameSectionControls(false);
+            }
+        });
+
+        $("#btnRenameSectionCancel").click(function () {
+            $('#inputRenameSection').val($('#textSectionName').text()); 
+            toggleRenameSectionControls(false);
+        });
+    });
+})(jQuery, Builder);

@@ -1,0 +1,542 @@
+html {
+    -ms-text-size-adjust: 100%; /* 3 */
+    -webkit-font-smoothing: antialiased;
+    -webkit-text-size-adjust: 100%; /* 3 */
+    font-family: 'Open Sans', arial, tahoma, verdana, sans-serif; /* 1 */
+    font-size: 62.5%;
+    height: 100%;
+    line-height: 1.5; /* 2 */
+}
+
+body {
+    background: #FCF9FE;
+    font-family: 'Open Sans', arial, tahoma, verdana, sans-serif; /* 1 */
+    font-size: 1.4rem;
+    font-weight: 400;
+    height: 100%;
+    line-height: 1.5;
+    margin: 0 auto;
+    width: 100%;
+}
+
+a {
+    /*color: #fff;*/
+}
+
+    a:focus, a:hover, a:active {        
+        text-decoration: none;
+        outline: none !important;
+        box-shadow: none !important;
+    }
+
+button:focus {
+    outline: none;
+}
+
+* {
+    -webkit-box-sizing: border-box;
+    -moz-box-sizing: border-box;
+    box-sizing: border-box;
+}
+
+input:focus {
+    box-shadow: none !important;
+    outline: none;
+}
+h1, h2, h3, h4, h5, h6 {
+    margin:0;
+    padding: 0;
+}
+
+/*** Button Style ***/
+
+.default-btn {
+    background-color: #eca20a;
+    border: 1px solid #eca20a;
+    border-radius: 4px;
+    color: #fff;
+    cursor: pointer;
+    display: inline-block;
+    font-size: 14px;
+    font-weight: 600;
+    padding: 10px 30px;
+    position: relative;
+}
+
+    .default-btn:hover, .default-btn:focus, .default-btn:active {
+        background-color: #dd9706 !important;
+        border: 1px solid #dd9706 !important;
+        color: #fff !important;
+        outline: none !important;
+        text-decoration: none;
+    }
+
+.primary-btn {
+    background-color: #5a7ec5;
+    border-radius: 4px;
+    color: #fff;
+    cursor: pointer;
+    display: inline-block;
+    font-size: 14px;
+    font-weight: 600;
+    padding: 10px 30px;
+}
+
+    .primary-btn:hover, .primary-btn:focus, .primary-btn:active {
+        background-color: #47438D;
+        color: #fff;
+        outline: none !important;
+        text-decoration: none;
+    }
+
+/*** Footer ***/
+footer {
+    border-bottom: 4px solid #ECA20A;
+}
+
+.footerInfo {
+    background: #3d487d;
+    padding: 3rem 0;
+}
+
+.footerLink {
+    list-style-type: none;
+    margin: 0;
+    padding: 0;
+}
+
+    .footerLink li {
+        color: #fff;
+        padding: 4px 0;
+    }
+
+        .footerLink li a {
+            color: #adb9f5;
+            cursor: pointer;
+            font-size: 1.6rem;
+            text-decoration: none;
+            transition: color .2s ease-in;
+        }
+
+            .footerLink li a:hover {
+                color: #eca20a;
+            }
+
+.footerCopyInfo {
+    background: #222b56;
+    border-bottom: 4px solid #0078d4;
+    color: #fff;
+    font-size: 1.3rem;
+    padding: 5px 0;
+}
+
+    .footerCopyInfo a {
+        color: #fff;
+        font-size: 1.3rem;
+        padding: 0 5px;
+        text-decoration: none;
+    }
+
+        .footerCopyInfo a:hover, .footerCopyInfo a:focus {
+            color: #eca20a;
+        }
+
+.modal-header {
+    border-bottom: none;
+}
+
+    .modal-header .btn-close {
+        font-size: 36px;
+        font-weight: 400;
+        color: #222b56;
+        opacity: 1;
+    }
+
+        .modal-header .btn-close:hover {
+            opacity: 1;
+        }
+
+.modal-title {
+    font-size: 2.2rem;
+    font-weight: 600;
+    color: #222b56;
+}
+
+.modal-body {
+    color: #222b56;
+}
+
+.modal-footer {
+    border-top: none;
+    text-align: center;
+}
+
+    .modal-footer .default-mid-btn {
+        background-color: #ffffff;
+        border: 1px solid #eca20a;
+        border-radius: 4px;
+        color: #eca20a;
+        cursor: pointer;
+        display: inline-block;
+        font-size: 14px;
+        font-weight: 600;
+        padding: 9px 30px;
+        margin-bottom: 0px;
+    }
+
+        .modal-footer .default-mid-btn:hover, .modal-footer .default-mid-btn:focus, .modal-footer .default-mid-btn:active {
+            background-color: #dd9706;
+            color: #fff;
+            outline: none;
+            text-decoration: none;
+        }
+
+    .modal-footer .btn-default {
+        background-color: #eca20a;
+        border: none;
+        border-radius: 4px;
+        color: #fff;
+        cursor: pointer;
+        display: inline-block;
+        font-size: 14px;
+        font-weight: 600;
+        padding: 10px 30px;
+        margin-bottom: 0px;
+    }
+
+        .modal-footer .btn-default:hover, .modal-footer .btn-default:focus, .modal-footer .btn-default:active {
+            background-color: #dd9706;
+            color: #fff;
+            outline: none;
+            text-decoration: none;
+        }
+
+    .modal-footer .btn + .btn {
+        margin-left: 10px;
+    }
+
+
+.mobileMenu {
+    display: none;   
+}
+
+
+.menuButton {
+    width: 24px;
+    height: 24px;
+    background: transparent;
+    border: none;
+    border-top: 2px solid #353535;
+    border-bottom: 2px solid #353535;
+    position: relative;
+}
+
+    .menuButton::before {
+        content: '';
+        width: 24px;
+        height: 2px;
+        background: #353535;
+        position: absolute;
+        left: 0;
+        top: 9px;
+    }
+
+.mobileSideMenu {
+    position: fixed;
+    width: 100%;
+    height: 100%;
+    top: 0;
+    right: -150%;
+    z-index: 9999;
+    background: rgba(0, 0, 0, 0.3);
+    overflow: hidden;
+    transition: all 500ms ease-in-out;
+}
+
+.mobileSideMenuShow {
+    right: 0;
+}
+
+.menuContainer {
+    position: absolute;
+    width: 300px;
+    height: 100%;
+    background: #fff;
+    top: 0;
+    right: 0;
+    z-index: 9;
+    padding: 55px 0 0;
+}
+
+.menuClose {
+    position: absolute;
+    height: 40px;
+    top: 7px;
+    right: 0;
+    z-index: 10;
+    cursor: pointer;
+}
+
+.closeIcon {
+    width: 20px;
+    margin: 10px 20px;
+}
+
+.menuList {
+    list-style-type: none;
+    margin: 0;
+    padding: 0;
+}
+
+.menuLine {
+    border-top: 1px solid #d4d4d4;
+    padding: 0 !important;
+    margin: 10px 0;
+}
+
+.menuList li {
+    padding: 8px 14px;
+    display: flex;
+}
+
+    .menuList li a {
+        font-size: 14px;
+        color: #222;
+        font-weight: 600;
+        display: flex;
+        text-decoration: none;
+    }
+
+    .menuList li a:hover {
+        color: #0078d4;
+        text-decoration: none;
+    }
+
+    .menuList li a.headerHelpIcon {
+        margin-left: 0 !important;
+    }
+
+.menuUserName {
+    font-size: 18px;
+    font-weight: 600;
+    padding: 0 14px 10px;
+}
+
+    .menuUserName span {
+        text-overflow: ellipsis;
+        flex: 1;
+        overflow: hidden;
+        white-space: nowrap;
+        width: 81%;
+    }
+.userInfoRow {
+    display:flex;
+    align-items: center;
+    width: 100%;
+}
+.menuUserIcon {
+    width: 34px;
+    height: 34px;
+    border-radius: 34px;
+    margin-right: 10px;
+    display: flex;
+    font-size: 18px;
+    color: #f0f3f8;
+    font-weight: 700;
+    background: #eca20a;
+    align-items: center;
+    justify-content: center;
+}
+
+.menuList li .menuLoginBtn {
+    background: #fff;
+    border-radius: 4px;
+    color: #eca20a;
+    cursor: pointer;
+    display: flex;
+    justify-content: center;
+    flex: 1;
+    font-size: 16px;
+    font-weight: 600;
+    padding: 12px 25px;
+    border: 1px solid #eca20a;
+}
+
+    .menuList li .menuLoginBtn:hover {
+        color: #eca20a;
+        opacity: 0.7;
+        text-decoration: none;
+    }
+
+.menuList li .menuSignUpBtn {
+    background: #eca20a;
+    border-radius: 4px;
+    color: #fff;
+    cursor: pointer;
+    display: flex;
+    justify-content: center;
+    flex: 1;
+    font-size: 16px;
+    font-weight: 600;
+    padding: 12px 25px;
+}
+
+    .menuList li .menuSignUpBtn:hover {
+        color: #fff;
+        opacity: 0.7;
+        text-decoration: none;
+    }
+
+
+
+
+
+.whiteMenu {
+    border-top: 2px solid #fff;
+    border-bottom: 2px solid #fff;
+}
+
+    .whiteMenu::before {
+        background: #fff;
+    }
+
+
+
+.loginTopBtn {
+    background: #fff;
+    border-radius: 4px;
+    color: #eca20a;
+    cursor: pointer;
+    display: flex;
+    justify-content: center;
+    flex: 1;
+    font-size: 14px;
+    font-weight: 600;
+    padding: 8px 24px;
+    border: 1px solid #eca20a;
+    margin-right: 10px;
+    white-space: nowrap;
+}
+
+    .loginTopBtn:hover, .loginTopBtn:active {
+        color: #eca20a !important;
+        opacity: 0.7;
+        text-decoration: none;
+    }
+
+.signTopBtn {
+    background: #eca20a;
+    border-radius: 4px;
+    color: #fff;
+    cursor: pointer;
+    display: flex;
+    justify-content: center;
+    flex: 1;
+    font-size: 14px;
+    font-weight: 600;
+    padding: 9px 15px;
+    margin-right: 10px;
+    white-space: nowrap;
+}
+
+.signTopBtn:hover, .signTopBtn:active {
+    color: #fff;
+    opacity: 0.7;
+    text-decoration: none;
+}
+
+.loaderSection {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0,0,0,0.4);
+    z-index: 99;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+}
+.loaderInfo {
+    width: 250px;
+    height: 250px;
+    background: #fff;
+    border-radius: 12px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding: 20px;
+}
+.loaderText {
+    font-size: 14px;
+    color: #222;
+    font-weight: 500;
+    padding-top: 20px;
+    text-align: center;
+}
+
+.spinnerLoader {
+    width: 56px;
+    height: 56px;
+    border-radius: 50%;
+    background: radial-gradient(farthest-side,#5a7ec5 94%,#0000) top/9px 9px no-repeat, conic-gradient(#0000 30%,#5a7ec5);
+    -webkit-mask: radial-gradient(farthest-side,#0000 calc(100% - 9px),#000 0);
+    animation: circleSpinner 1s infinite linear;
+}
+.modal-header {
+    display: flex;
+    justify-content: space-between;
+    flex-direction: row-reverse;
+}
+
+.modal-header .close {
+    font-size: 36px;
+    font-weight: 400;
+    color: #222b56;
+    line-height: 1;
+    opacity: 1;
+    background: transparent;
+    border: none;
+}
+
+@keyframes circleSpinner {
+    100% {
+        transform: rotate(1turn);
+    }
+}
+
+
+@media (max-width: 767px) {
+    .footerLink li {
+        text-align: center;
+    }
+
+    .mobileMenu {
+        display: flex;
+        align-items: center;
+        padding: 0 10px;
+    }
+
+    .mobileHide {
+        display: none !important;
+    }
+    
+}
+@media (min-width: 1200px) {
+    .container {
+        max-width: 1170px;
+    }
+}
+
+@media (min-width: 1400px) {
+    .container {
+        max-width: 1170px;
+        /* max-width: 1320px;*/
+    }
+    
+}
+
+    /*** Bootstrap Overrides ***/
+

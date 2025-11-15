@@ -1,0 +1,145 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: "Poppins", sans-serif;
+}
+
+.login-page {
+  background-color: #facc15;
+  height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.login-container {
+  display: flex;
+  width: 850px;
+  height: 500px;
+  background: #ffffff;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+  border-radius: 20px;
+  overflow: hidden;
+}
+
+/* Left image section */
+.login-image {
+  flex: 1;
+  background-color: #f9f9f9;
+}
+
+.login-image img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* Right form section */
+.login-form {
+  flex: 1;
+  padding: 60px 50px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.login-form h2 {
+  margin-bottom: 10px;
+  font-size: 28px;
+  color: #333;
+}
+
+.login-form p {
+  margin-bottom: 25px;
+  color: #777;
+}
+
+.form-group {
+  margin-bottom: 20px;
+  display: flex;
+  flex-direction: column;
+}
+
+.form-group label {
+  margin-bottom: 5px;
+  color: #333;
+  font-weight: 500;
+}
+
+.form-group input {
+  padding: 10px 14px;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  font-size: 15px;
+  outline: none;
+  transition: 0.3s;
+}
+
+.form-group input:focus {
+  border-color: #007bff;
+}
+
+button {
+  background-color: #facc15;
+  color: white;
+  padding: 9px;
+  border: none;
+  border-radius: 8px;
+  font-size: 19px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: 0.3s;
+  padding-left: 130px;
+  padding-right: 149px;
+  text-align: center;
+  margin-left: 10px;
+  margin-right: 10px;
+}
+
+button:hover {
+  background-color: #0056b3;
+}
+
+.signup-text {
+  margin-top: 15px;
+  text-align: center;
+  color: #555;
+}
+
+.signup-text a {
+  color: #007bff;
+  text-decoration: none;
+}
+
+.signup-text a:hover {
+  text-decoration: underline;
+}
+/* ✅ Simple Success/Error Text */
+.message {
+  margin-top: 10px;
+  font-weight: 700;
+  text-align: center;
+  font-size: 18px;
+  animation: fadeIn 0.4s ease-in-out;
+}
+
+.message.success {
+  color: #1e8f3f; /* soft green */
+}
+
+.message.error {
+  color: #d43f3a; /* soft red */
+}
+
+/* Fade-in animation */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}

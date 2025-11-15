@@ -1,0 +1,68 @@
+.bookshow-container {
+  display: flex;
+  flex-direction: column; /* 👈 stacks movies vertically */
+  gap: 30px; /* space between movies */
+  width: 80%;
+  margin: 50px auto;
+}
+
+.movie-box {
+  display: flex;
+  padding: 10px;
+  gap: 20px;
+  background: #ffffff;
+  border-radius: 15px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+  overflow: hidden;
+  transition: transform 0.3s ease;
+}
+
+.movie-box:hover {
+  transform: scale(1.02);
+}
+
+.poster-section img {
+  width: 180px;
+  height: 250px;
+  object-fit: cover;
+  border-radius: 10px 0 0 10px;
+}
+
+.info-section {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: 15px 20px;
+}
+
+.movie-title {
+  font-size: 22px;
+  margin-bottom: 8px;
+  color: black;
+}
+
+.movie-location {
+  font-size: 16px;
+  color: #666;
+  margin-bottom: 15px;
+}
+
+.timings {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.time-btn {
+  background: #ff3d49;
+  color: #fff;
+  border: none;
+  padding: 8px 14px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: 600;
+}
+
+.time-btn:hover {
+  background: #ff1f35;
+}

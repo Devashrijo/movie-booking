@@ -1,0 +1,57 @@
+/* Custom styles for Driver.js tour */
+
+div#driver-popover-item {
+    background-color: #0096d4;
+    color: #ffffff;
+}
+
+div#driver-popover-item .driver-popover-title {
+    color: #ffffff;
+}
+
+div#driver-popover-item .driver-popover-description {
+    color: #ffffff;
+}
+
+div#driver-popover-item .driver-popover-close-btn {
+    color: #ffffff;
+}
+
+div#driver-popover-item .driver-popover-close-btn:hover {
+    color: #e6e6e6;
+}
+
+div#driver-popover-item .driver-popover-footer button {
+    background-color: #eca20a;
+    color: #ffffff;
+    text-shadow: none;
+    border: 1px solid #eca20a;
+}
+
+div#driver-popover-item .driver-popover-footer button:hover {
+    background-color: #d48f09;
+    border-color: #d48f09;
+    box-shadow: 0 0 5px rgba(0,0,0,0.5);
+}
+
+div#driver-popover-item .driver-popover-tip.left {
+    border-right-color: #0096d4;
+}
+
+div#driver-popover-item .driver-popover-tip.right {
+    border-left-color: #0096d4;
+}
+
+div#driver-popover-item .driver-popover-tip.top {
+    border-bottom-color: #0096d4;
+}
+
+div#driver-popover-item .driver-popover-tip.bottom {
+    border-top-color: #0096d4;
+}
+
+#tour-help-icon {
+    display: inline-block;
+    vertical-align: middle;
+    margin-left: 10px;
+}

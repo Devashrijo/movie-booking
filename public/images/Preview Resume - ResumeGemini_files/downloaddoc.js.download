@@ -1,0 +1,94 @@
+﻿/* Download Document JS */
+function showProgressBar() {
+    // You can customize this to show an actual loading bar/spinner
+    $('body').append('<div id="progress-overlay"><div class="loading">Downloading...</div></div>');
+}
+
+function hideProgressBar() {
+    $('#progress-overlay').remove();
+}
+
+$(function () {
+    $('[data-bs-toggle="popover"]').popover();
+});
+
+function populateModalContent(currentDocumentProfileName, profiles, quota) {
+    // Set profile name display
+    $('#document-profile-name').text(currentDocumentProfileName || 'No contact information available.');
+
+    // Show existing profiles
+    if (profiles && profiles.length > 0) {
+        $('#user-profile-list').empty();
+        profiles.forEach(p => {
+            $('#user-profile-list').append(`<li>${p}</li>`);
+        });
+        $('#existing-profiles-section').show();
+    } else {
+        $('#existing-profiles-section').hide();
+    }
+   
+    if (quota && typeof quota.BalanceAvailable !== "undefined") {
+        $('#profile-quota-info').html(
+            `<strong>Profile(s) Available:</strong> ${quota.BalanceAvailable} / ${quota.AllocatedQuota}`
+        );
+
+        const isQuotaAvailable = (quota.BalanceAvailable > 0);
+
+        $('#btn-create-profile').toggle(isQuotaAvailable);
+        $('#profile-limit-message').toggle(!isQuotaAvailable);
+        $('#message-continue-profile').toggle(isQuotaAvailable);
+        $('#message-limit-profile').toggle(!isQuotaAvailable);
+        $('#info-icon1').toggle(!isQuotaAvailable);
+    } else {
+        $('#profile-quota-info').html(`<strong>No User Profile Available</strong>`);
+        $('#btn-create-profile').hide();
+        $('#profile-limit-message').hide();
+        $('#message-continue-profile').hide();
+        $('#message-limit-profile').hide();
+        $('#info-icon1').hide();
+    }
+}
+
+$('#btn-create-profile').on('click', function () {
+    var tokenUrl = $(this).attr("token-url");
+    var downloadUrl = $(this).attr("downlaod-url");
+    showProgressBar();
+    Builder.Http.Post({ url: Builder.Data.Get("CreateUserProfileAddress"), data: { "profileName": $(this).attr("profile-name") } })
+        .done(function (response) {
+            if (response) {
+                downloadDocument(tokenUrl, downloadUrl);
+            } else {
+                alert("Profile creation failed. Please try again.");
+            }
+        }).always(function () {
+            $('#download-modal').modal('hide');
+            hideProgressBar();
+        });
+});
+
+$('#btnCancelDownload').on('click', function () {
+    $('#download-modal').modal('hide');
+});
+
+$('#btn-buy-profile').on('click', function () {
+    location.href = Builder.Data.Get("UpgradeProfileAddress");
+});
+
+function downloadDocument(tokenURL, downloadURL) {
+    Builder.Http.Get({ url: tokenURL }).done(function (response) {
+        if (response.Success) {
+            window.location.href = downloadURL + '&documentToken=' + encodeURIComponent(response.Token);
+        } else {
+            if (response.ProfileValidationResponse) {
+                var profileValidation = response.ProfileValidationResponse;
+                populateModalContent(profileValidation.ProfileName, profileValidation.ExistingProfiles, profileValidation.ProfileFeatureQuota);
+                $('#btn-create-profile').attr("profile-name", profileValidation.ProfileName);
+                $('#btn-create-profile').attr("token-url", tokenURL);
+                $('#btn-create-profile').attr("downlaod-url", downloadURL);
+                $('#download-modal').modal('show');
+            } else if (response.RedirectUrl) {
+                window.location.href = response.RedirectUrl;
+            }
+        }
+    });
+}

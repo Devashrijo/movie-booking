@@ -1,0 +1,282 @@
+﻿(function($) {
+    window.Builder = window.Builder || {};
+    var Builder = window.Builder;
+
+    var _data = {};
+    Builder.Data = {
+        Get: function(key) {
+            return _data[key];
+        },
+        Set: function(obj) {
+            $.extend(_data, obj);
+        }
+    };
+    //var $jsonProps = $("#jsonProps");
+    //Builder.Data = {
+    //    Get: function (key) {
+    //        return $jsonProps.attr(key);
+    //    }
+    //};
+
+    if (Builder.TempData) {
+        Builder.Data.Set(Builder.TempData);
+        Builder.TempData = undefined;
+    }
+
+    var _plugins = {};
+    Builder.Plugin = function(namespace) {
+        if (!_plugins[namespace]) {
+            _plugins[namespace] = new _plugin(namespace);
+        }
+        return _plugins[namespace];
+    };
+
+    function _plugin(namespace) {
+        this.namespace = namespace;
+        this.scriptLoaded = false;
+        this.readyCallbacks = [];
+    }
+
+    _plugin.prototype.LoadScript = function (scriptUrl) {
+        if (this.scriptLoaded) {
+            return this;
+        }
+        const that = this;
+        $.ajax({
+                dataType: "script",
+                url: scriptUrl,
+                cache: true,
+                success: () => {
+                    that.scriptLoaded = true;
+                    that.readyCallbacks.forEach(callback => callback(that));
+                    that.readyCallbacks = [];
+                },
+                error: (error) => {}
+            });
+        return this;
+    };
+
+    _plugin.prototype.Ready = function (callback) {
+        if (this.scriptLoaded) {
+            callback(this);
+        } else {
+            this.readyCallbacks.push(callback);
+        }
+        return this;
+    };
+
+    function ajax(obj, method) {
+        var ajaxLoadTimeout = null;
+        if (obj.disableLoader !== true && method === "POST") {
+            ajaxLoadTimeout = setTimeout(Builder.Loader.Show, 300);
+        }
+        return $.ajax({
+            url: obj.url,
+            type: method,
+            data: JSON.stringify(obj.data),
+            contentType: "application/json; charset=utf-8",
+            dataType: (obj.dataType || "json"),
+            async: true,
+            timeout: obj.timeout
+        }).done(function(data) {
+            return data;
+        }).fail(function(err) {
+            return err;
+        }).always(function() {
+            if (obj.disableLoader !== true && method === "POST") {
+                Builder.Loader.Hide();
+                if (ajaxLoadTimeout) {
+                    clearTimeout(ajaxLoadTimeout);
+                }
+            }
+        });
+    }
+
+    function ajaxFileUpload(obj) {
+        var ajaxLoadTimeout = null;
+        if (obj.disableLoader !== true) {
+            ajaxLoadTimeout = setTimeout(Builder.Loader.Show, 300);
+        }
+        return $.ajax({
+            url: obj.url,
+            type: "POST",
+            timeout: 0,
+            data: obj.data,
+            processData: false,
+            mimeType: "multipart/form-data",
+            contentType: false,
+        }).done(function(data) {
+            return data;
+        }).fail(function(err) {
+            return err;
+        }).always(function () {
+            if (obj.disableLoader !== true) {
+                Builder.Loader.Hide();
+                if (ajaxLoadTimeout) {
+                    clearTimeout(ajaxLoadTimeout);
+                }
+            }
+        });
+    }
+
+    Builder.Http = {};
+    Builder.Http.Get = function(obj) { return ajax(obj, "GET"); };
+    Builder.Http.Post = function (obj) { return ajax(obj, "POST"); };
+    Builder.Http.FileUpload = function (obj) { return ajaxFileUpload(obj); };
+    Builder.User = {};
+    Builder.User.UpdateProgress = function () {
+        var url = Builder.Data.Get("TrackPageViewAddress");
+        if (url) {
+            var obj = { url: url, disableLoader: true };
+            ajax(obj, "POST");
+        }
+    };
+
+    Builder.Loader = {
+        Show: function () {
+            $("#btnSaveAndNextLoader").addClass("saveLoaderBtn");
+        },
+        Hide: function () {
+            $("#btnSaveAndNextLoader").removeClass("saveLoaderBtn");
+        },
+        Append: function(selector) {
+            $(selector).prepend($("<div/>").addClass("loading-widget"));
+        },
+        Remove: function(selector) {
+            $(selector).find(".loading-widget").remove();
+        }
+    };
+
+    Builder.Toast = {
+        ShowText: function (text, duration = 10000) {
+            Toastify({
+                text: text,
+                duration: duration,
+                close: true,
+                gravity: "top",
+                position: "right",
+                stopOnFocus: true,
+                style: {
+                    background: "#3686d8",
+                },
+                onClick: function () { }
+            }).showToast();
+        },
+
+        ShowErrorText: function (text, duration = 10000) {
+            Toastify({
+                text: text,
+                duration: duration,
+                close: true,
+                gravity: "top",
+                position: "right",
+                stopOnFocus: true,
+                style: {
+                    background: "#ff0000",
+                },
+                onClick: function () { }
+            }).showToast();
+        },
+
+        ShowLinkText: function (text, link, newWindow = true, duration = 10000) {
+            Toastify({
+                text: text,
+                duration: duration,
+                destination: link,
+                newWindow: newWindow,
+                close: true,
+                gravity: "top",
+                position: "right",
+                stopOnFocus: true,
+                style: {
+                    background: "#3686d8",
+                },
+                onClick: function () { }
+            }).showToast();
+        },
+    }
+
+    function getCookie(name) {
+        const nameEQ = name + "=";
+        const ca = document.cookie.split(';');
+        for (let i = 0; i < ca.length; i++) {
+            let c = ca[i];
+            while (c.charAt(0) === ' ') c = c.substring(1, c.length);
+            if (c.indexOf(nameEQ)
+                === 0) return c.substring(nameEQ.length, c.length);
+        }
+        return null;
+    }
+
+    function setCookie(name, value, days, secure = true) {
+        let expires = "";
+        if (days) {
+            let date = new Date();
+            date.setTime(date.getTime() + (days * 24 * 60 * 60 * 1000));
+            expires = "; expires=" + date.toUTCString();
+        }
+
+        let cookieString
+            = `${name}=${encodeURIComponent(value)}${expires}; path=/`;
+        if (secure) {
+            cookieString += "; secure";
+        }
+        document.cookie = cookieString;
+    }
+
+    function fetchIP() {
+        var requestIP = Builder.Data.Get("RequestIP");
+        if (requestIP && requestIP !== "127.0.0.1")
+            return Promise.resolve(requestIP);
+        return fetch('https://ipv4.icanhazip.com/')
+            .then(response => response.text())
+            .then(ip => ip.trim())
+            .catch(error => {
+                return Promise.reject(error);
+            });
+    }
+
+    function fetchGeolocation(ip) {
+        var geoLocationUrl = "https://ipapi.co/" + ip + "/json/";
+        return fetch(geoLocationUrl)
+            .then(response => response.json())
+            .catch(error => {
+                return Promise.reject(error);
+            });
+    }
+
+    function setUserCountry() {
+        if (!getCookie("ccd")) {
+            fetchIP()
+                .then(ip => fetchGeolocation(ip))
+                .then(data => {
+                    if (data && !!data.country_code) {
+                        setCookie("ccd", data.country_code, 365);
+                    }
+                })
+                .catch(error => { });
+        }
+    }
+
+    function trackPageView() {
+        var url = Builder.Data.Get("TrackPageViewAddress");
+        if (url) {
+            ajax({ url: url, disableLoader: true }, "POST");
+        }
+    }
+
+    $(function () {
+        $(document).ready(function () {
+            trackPageView();
+            setUserCountry();
+        })
+        $(".tips-button").click(function () {
+            const tipsArea = $(".tips-area")[0];
+            tipsArea.classList.toggle("visible");
+        });
+        $(".tips-close").click(function () {
+            const tipsArea = $(".tips-area")[0];
+            tipsArea.classList.toggle("visible");
+        });
+    });
+})(jQuery);

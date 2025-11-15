@@ -1,0 +1,210 @@
+@font-face {
+    font-family: 'icomoon';
+    font-style: normal;
+    font-weight: normal;
+    src: url('/font/icomoon.eot?q93mj9');
+    src: url('/font/icomoon.eot?q93mj9#iefix') format('embedded-opentype'),
+         url('/font/icomoon.ttf?q93mj9') format('truetype'),
+         url('/font/icomoon.woff?q93mj9') format('woff'),
+         url('/font/icomoon.svg?q93mj9#icomoon') format('svg');
+}
+
+[class^="icon-"], [class*=" icon-"] {
+    -moz-osx-font-smoothing: grayscale;
+    /* Better Font Rendering =========== */
+    -webkit-font-smoothing: antialiased;
+    display: inline-flex;
+    /* use !important to prevent issues with browser extensions that change fonts */
+    font-family: 'icomoon' !important;
+    font-style: normal;
+    font-variant: normal;
+    font-weight: normal;
+
+    line-height: 1;
+    speak: none;
+    text-transform: none;
+}
+
+.icon-Star:before { content: "\e91e"; }
+
+.icon-Facebook:before { content: "\e91a"; }
+
+.icon-Lock:before { content: "\e91b"; }
+
+.icon-Twitter:before { content: "\e91c"; }
+
+.icon-User:before { content: "\e91d"; }
+
+.icon-Others:before { content: "\e916"; }
+
+.icon-Accomplishments:before { content: "\e917"; }
+
+.icon-Awards:before { content: "\e918"; }
+
+.icon-Certifications:before { content: "\e919"; }
+
+.icon-ExtraCurricular:before { content: "\e920"; }
+
+.icon-Language:before { content: "\e921"; }
+
+.icon-PersonalInformation:before { content: "\e922"; }
+
+.icon-References:before { content: "\e929"; }
+
+.icon-Projects:before { content: "\f15c"; font-family:FontAwesome !important; }
+
+.icon-SocialServices:before { content: "\e941"; }
+
+.icon-SpellChecker:before { content: "\e946"; }
+
+.icon-ArrowRight:before {
+    content: "\e915";
+    cursor: pointer;
+}
+
+.icon-Menu:before { content: "\e913"; }
+
+.icon-Move:before { content: "\e914"; }
+
+.icon-AddResume:before { content: "\e902"; }
+
+.icon-BestSeller:before { content: "\e903"; }
+
+.icon-Device:before { content: "\e904"; }
+
+.icon-Education:before { content: "\e905"; }
+
+.icon-Experience:before { content: "\e906"; }
+
+.icon-Expert:before { content: "\e907"; }
+
+.icon-Printer .path1:before {
+    color: #5a7ec5;
+    content: "\e908";
+}
+
+.icon-Printer .path2:before {
+    color: #5a7ec5;
+    content: "\e909";
+    margin-left: -1.1103515625em;
+}
+
+.icon-Printer .path3:before {
+    color: #5a7ec5;
+    content: "\e90d";
+    margin-left: -1.1103515625em;
+}
+
+.icon-Printer .path4:before {
+    color: #eca20a;
+    content: "\e90e";
+    margin-left: -1.1103515625em;
+}
+
+.icon-ReadingCheck:before { content: "\e90f"; }
+
+.icon-SelectTemplate:before { content: "\e910"; }
+
+.icon-SummaryTemplate:before { content: "\e911"; }
+
+.icon-Contact:before { content: "\e912"; }
+
+.icon-Trash:before { content: "\e938"; }
+
+.icon-Add:before { content: "\e933"; }
+
+.icon-ChangeTemplate .path1:before {
+    color: rgb(255, 255, 255);
+    content: "\e934";
+}
+
+.icon-ChangeTemplate .path2:before {
+    color: rgb(255, 255, 255);
+    content: "\e935";
+    margin-left: -1em;
+}
+
+.icon-ChangeTemplate .path3:before {
+    color: rgb(255, 255, 255);
+    content: "\e936";
+    margin-left: -1em;
+}
+
+.icon-ChangeTemplate .path4:before {
+    color: rgb(102, 102, 102);
+    content: "\e937";
+    margin-left: -1em;
+}
+
+.icon-Edit:before { content: "\e93a"; }
+
+.icon-Format:before { content: "\e93b"; }
+
+.icon-Themes:before { content: "\e93c"; }
+
+.icon-Tips:before { content: "\e93d"; }
+
+.icon-Boost .path1:before {
+    color: #5a7ec5;
+    content: "\e900";
+}
+
+.icon-Boost .path2:before {
+    color: #eca20a;
+    content: "\e901";
+    margin-left: -1.5556640625em;
+}
+
+.icon-SignUp .path1:before {
+    color: #5a7ec5;
+    content: "SignUp";
+}
+
+.icon-SignUp .path2:before {
+    color: #eca20a;
+    content: "SignUp";
+    margin-left: -1.5556640625em;
+}
+
+
+.path1:before {
+    color: #5a7ec5;
+    content: "\e90a";
+}
+
+.icon-AddTemplate .path2:before {
+    color: #5a7ec5;
+    content: "\e90b";
+    margin-left: -1.2998046875em;
+}
+
+.icon-AddTemplate .path3:before {
+    color: #eca20a;
+    content: "\e90c";
+    margin-left: -1.2998046875em;
+}
+
+.icon-Skill:before { content: "\e924"; }
+
+.icon-Template .path1:before {
+    color: #5a7ec5;
+    content: "\e92b";
+}
+
+.icon-Template .path2:before {
+    color: #5a7ec5;
+    content: "\e92c";
+    margin-left: -0.9619140625em;
+}
+
+.icon-Template .path3:before {
+    color: #5a7ec5;
+    content: "\e92d";
+    margin-left: -0.9619140625em;
+}
+
+.icon-Template .path4:before {
+    color: #eca20a;
+    content: "\e92e";
+    margin-left: -0.9619140625em;
+}

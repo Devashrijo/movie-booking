@@ -1,0 +1,82 @@
+/* Global reset */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: Arial, Helvetica, sans-serif;
+}
+.filmio-section {
+  position: relative;
+  height: 100vh;
+  width: 100%;
+  background-size: cover;
+  background-position: center center;
+  background-repeat: no-repeat;
+  background-attachment: fixed;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  transition: background-image 1s ease-in-out;
+  overflow: hidden;
+}
+.overlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.55);
+  z-index: 1;
+}
+.filmio-content {
+  position: relative;
+  text-align: center;
+  color: #fff;
+  z-index: 2;
+  max-width: 700px;
+  padding: 20px;
+  animation: fadeIn 1s ease-in-out;
+}
+
+.filmio-content h1 {
+  font-size: 2.8rem;
+  margin-bottom: 10px;
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+}
+
+.filmio-content h4 {
+  font-size: 1.3rem;
+  line-height: 1.6;
+  font-weight: 400;
+  opacity: 0.9;
+}
+.buy-btn {
+  margin-top: 20px;
+  padding: 12px 30px;
+  font-size: 1rem;
+  background: #ff4c4c;
+  color: #fff;
+  border: none;
+  border-radius: 30px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  letter-spacing: 0.5px;
+  font-weight: 600;
+  z-index: 2;
+  position: relative;
+}
+
+.buy-btn:hover {
+  background: #ff2020;
+  transform: scale(1.05);
+  box-shadow: 0 0 15px rgba(255, 76, 76, 0.6);
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(15px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}

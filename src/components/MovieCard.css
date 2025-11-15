@@ -1,0 +1,56 @@
+.movie-card {
+  width: 220px;
+  background-color: white;
+  color: white;
+  border-radius: 15px;
+  padding: 15px;
+  text-align: center;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+  transition: transform 0.3s;
+}
+
+.movie-card:hover {
+  transform: scale(1.05);
+}
+
+.movie-poster {
+  width: 100%;
+  height: 300px;
+  object-fit: cover;
+  border-radius: 10px;
+}
+
+.movie-name {
+  margin-top: 10px;
+  font-size: 18px;
+  font-weight: 600;
+}
+
+.movie-language,
+.movie-genre {
+  padding: 4px;
+  font-size: 14px;
+  color: #aaa;
+}
+.movie-list {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 25px;
+  padding: 30px;
+}
+.book-btn {
+  margin-top: 15px;
+  background-color: #e50914; /* Netflix red */
+  color: white;
+  border: none;
+  border-radius: 8px;
+  padding: 10px 15px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: backgroundcolor 0.3s ease;
+}
+
+.book-btn:hover {
+  background-color: #b00610;
+}

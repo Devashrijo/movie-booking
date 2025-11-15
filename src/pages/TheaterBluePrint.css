@@ -1,0 +1,21 @@
+.theater-container {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 40px;
+  padding: 30px 60px; /* gives 30px top space below header */
+  background-color: #f8f8f8;
+  min-height: 90vh;
+}
+
+/* Left (screen + seats) */
+.left-section {
+  flex: 1;
+}
+
+/* Right (bill section) */
+.right-section {
+  width: 340px;
+  position: sticky;
+  top: 100px; /* stays visible when scrolling */
+}

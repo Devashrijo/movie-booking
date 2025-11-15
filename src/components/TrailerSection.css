@@ -1,0 +1,79 @@
+* {
+  padding: 0px;
+  margin: 0px;
+  font-family: Arial, Helvetica, sans-serif;
+}
+.trailer-section {
+  background-color: white;
+  padding: 20px 0;
+  text-align: center;
+}
+.section-title {
+  font-size: 14px;
+  font-weight: bold;
+  margin-left: 20px;
+  color: black;
+}
+.maintrailer {
+  position: relative;
+  width: 80%;
+  max-width: 700px;
+  margin: 0 auto 20px;
+  border-radius: 16px;
+  overflow: hidden;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+}
+.main-image {
+  width: 100%;
+  height: 660px;
+  object-fit: cover;
+  transition: transform 0.3s ease;
+}
+.main-image:hover {
+  transform: scale(1.02);
+}
+.play-button {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  font-size: 78px;
+  background: rgba(0, 0, 0, 0.5);
+  color: white;
+  border: none;
+  border-radius: 50%;
+  padding: 12px 20px;
+  cursor: pointer;
+}
+.play-button:hover {
+  background: rgba(0, 0, 0, 0.8);
+}
+.thumbnails-row {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 10px;
+  margin-top: 20px;
+}
+.thumbnail {
+  width: 130px;
+  height: 150px;
+  overflow: hidden;
+  border-radius: 8px;
+  cursor: pointer;
+  border: 2px solid transparent;
+  transition: transform 0.3s ease, border-color 0.3s ease;
+}
+.thumbnail img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.thumbnail:hover {
+  transform: scale(1.05);
+}
+
+.thumbnail:active {
+  border-color: rgb(0, 123, 255);
+  transform: scale(1.08);
+}

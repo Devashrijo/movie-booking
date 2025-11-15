@@ -1,0 +1,76 @@
+.bill-container {
+  background: #fff;
+  padding: 20px;
+  border-radius: 12px;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+  width: 320px;
+}
+
+/* Movie info at top */
+.bill-movie-info {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  margin-bottom: 15px;
+}
+
+.bill-movie-poster {
+  width: 70px;
+  height: 100px;
+  border-radius: 8px;
+  object-fit: cover;
+}
+
+.bill-movie-name {
+  font-size: 18px;
+  font-weight: 600;
+  color: black;
+  margin-bottom: 4px;
+}
+
+.bill-location,
+.bill-time {
+  font-size: 14px;
+  color: black;
+}
+
+.bill-divider {
+  border: none;
+  border-top: 1px solid #eee;
+  margin: 10px 0;
+}
+
+/* Seat list */
+.seat-list {
+  list-style: none;
+  padding: 0;
+  margin: 10px 0;
+}
+
+.seat-list li {
+  font-size: 14px;
+  margin: 4px 0;
+  color: black;
+}
+
+/* Price details */
+.price-breakdown {
+  margin-top: 15px;
+  font-size: 15px;
+}
+
+.proceed-btn {
+  width: 100%;
+  margin-top: 15px;
+  padding: 10px;
+  background-color: #e50914;
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: 0.3s;
+}
+
+.proceed-btn:hover {
+  background-color: #b0060f;
+}

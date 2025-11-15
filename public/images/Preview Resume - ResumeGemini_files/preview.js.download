@@ -1,0 +1,959 @@
+(function ($, Builder) {
+    var pendingStyleChanges = false;
+    var currentSkinCD = Builder.Data.Get("Template"),
+        $hdnSaveGroups = $("#hdnSaveGroups"),
+        $txtOther = $("#txtOther"),
+        $selectOptionMessage = $("#select-otion-error-message"),
+        $editContainer = $("#edit-container"),
+        $missingSections = $("#missing-groups"),
+        $btnAddSectionContainer = $("#btnAddSectionContainer"),
+        $addCheckboxes = $missingSections.find("input[type=checkbox][name=add-group-options]"),
+        $skinTemplates = $("#all-templates"),
+        //$skinColorThemes = $("#skin-color-themes"),
+        $tabIcons = $("#tab-icons"),
+        $tabContainer = $("#tab-container"),
+        $mobileMenu = $("#mobileToolsMenu"),
+        $themeContainer = $("#themeContainer"),
+        $formattingContainer = $("#formattingContainer"),
+        resumeContainer = document.getElementById("resumeContainer"),
+        currentResumeIframe = document.getElementById("currentResume");
+
+
+    function bindDocHtml(html) {
+        if (html.trim()) {
+            const style = `<style>
+                .pdf-page-break-visual {
+                        background: #FCF9FE;
+                        height: 40px;
+                        margin: 24px -70px;
+                        width: 120%;
+                        box-sizing: border-box;
+                        box-shadow: none;
+                        display: flex;
+                        align-items: center;
+                        justify-content: center;
+                        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+                        font-size: 12px;
+                        font-weight: 500;
+                        color: #000;
+                        text-transform: uppercase;
+                        letter-spacing: 0.5px;
+                        border-top: 1px solid #FCF9FE;
+                        border-bottom: 1px solid #FCF9FE;
+                }
+
+                .pdf-page-break-visual::before {
+                    content: '';
+                    position: absolute;
+                    bottom: 100%; 
+                    left: 2%;
+                    width: 96%;
+                    height: 10px;
+                    background: linear-gradient(to bottom, transparent, rgba(0, 0, 0, 0.04));
+                    z-index: -1;
+                }
+
+                .pdf-page-break-visual::after {
+                    content: attr(data-page-number);
+                }
+
+                @@media print {
+                    .pdf-page-break-visual {
+                        height: 0 !important;
+                        margin: 0 !important;
+                        padding: 0 !important;
+                        background: none !important;
+                        border: none !important;
+                        visibility: hidden;
+                        page-break-after: always !important;
+                    }
+
+                    .pdf-page-break-visual::before,
+                    .pdf-page-break-visual::after {
+                        content: none !important;
+                    }
+                }
+            </style>`;
+            const finalHtml = html + style;
+            currentResumeIframe.contentWindow.document.open();
+            currentResumeIframe.contentWindow.document.write(finalHtml);
+
+            //Show/Hide Photo Options -- if this is photo template, then show the photo formatting options, else hide them
+            if (html.indexOf("resumePhoto") !== -1) {
+                $(".showPhotoOptions").css("display", "block");
+            }
+            else {
+                $(".showPhotoOptions").css("display", "none");
+            }
+
+            //Hide when it's not a premium user active
+            isPremiumUser().then(function (isPremium) {
+                if (!isPremium && (html.indexOf("<title>Basic</title>") !== -1 || html.indexOf("<title>Artistic</title>") !== -1)) {
+                    $("#formattingContainer").addClass("disabled");
+                    $("#paidPlanMessage").removeClass("display-none");
+                }
+                else {
+                    $("#formattingContainer").removeClass("disabled");
+                    $("#paidPlanMessage").addClass("display-none");
+                }
+            });
+
+            //Show/Hide Background Options on Superb and Magnetic templates
+            if (html.indexOf("<title>Superb</title>") !== -1 || html.indexOf("<title>Magnetic</title>") !== -1) {
+                $(".showBGOptions").css("display", "none");
+            }
+            else {
+                $(".showBGOptions").css("display", "block");
+            }
+
+            currentResumeIframe.contentWindow.document.write(`
+                <script>
+                    window.onload = function() {
+                        window.parent.postMessage({
+                            'action': 'iframeLoaded',
+                            'height': document.body.scrollHeight
+                        }, '*');
+                    };
+                </script>
+            `);
+            currentResumeIframe.contentWindow.document.close();
+        }
+    }
+
+
+    function updatePageBreaks() {
+        // Get the page size from dropdown
+        const selectedSize = $("#pageSizeSelector").val(); // "A4" or "Letter"
+
+        // --- Match these values to C# logic ---
+        const displayFooter = false; // Example: Check if the user has a footer enabled
+        const firstPageMargin = 20; // Example: User-defined top margin in mm
+
+        const standardBottomMargin = displayFooter ? 10 : 5;
+
+        showPdfPageBreaks({
+            iframeId: "currentResume",
+            pageSize: selectedSize,
+            firstPageTopMarginMM: 5, // From htmlToPdfRequest.TopMargin --> Needs to be updated
+            standardTopMarginMM: 5,               // The default value in your C# code
+            standardBottomMarginMM: 5, // Calculated from DisplayFooter
+            breakableSelector: 'p, ul, ol, li, h1, h2, h3, h4, table, .section, .resume-section, .job-entry'
+        });
+    }
+
+    /**
+ *
+ * @param {object} options - Configuration for the page break calculation.
+ * @param {string} options.iframeId - The ID of the iframe with the resume content.
+ * @param {string} options.pageSize - The page size, "A4" or "Letter".
+ * @param {number} options.firstPageTopMarginMM - The top margin for the very first page in millimeters.
+ * @param {number} options.standardTopMarginMM - The top margin for all subsequent pages in millimeters.
+ * @param {number} options.standardBottomMarginMM - The bottom margin for all pages in millimeters.
+ * @param {string} options.breakableSelector - A jQuery selector for elements to avoid breaking (e.g., 'p, li, .section').
+ */
+    function showPdfPageBreaks(options) {
+        const {
+            iframeId,
+            pageSize,
+            firstPageTopMarginMM,
+            standardTopMarginMM,
+            standardBottomMarginMM,
+            breakableSelector
+        } = options;
+
+        const $iframe = $("#" + iframeId);
+        if (!$iframe.length) {
+            console.error("Iframe #" + iframeId + " not found!");
+            return;
+        }
+
+        const iframeDocument = $iframe[0].contentDocument || $iframe[0].contentWindow.document;
+        const $container = $(iframeDocument.body);
+
+        // --- 1. Configuration & Pixel Calculation ---
+        const DPI = 96; // This is the key. Puppeteer/Chrome uses 96 DPI for screen-to-print rendering.
+        const A4_HEIGHT_INCHES = 11.69;
+        const LETTER_HEIGHT_INCHES = 11.0;
+        const breakLineClass = "pdf-page-break-visual";
+
+        const mmToPixels = (mm) => (mm / 25.4) * DPI;
+
+        const pageHeightInches = pageSize === "Letter" ? LETTER_HEIGHT_INCHES : A4_HEIGHT_INCHES;
+        const pageHeightPixels = pageHeightInches * DPI;
+
+        // Calculate the usable content area for the first and subsequent pages
+        const firstPageContentHeight = pageHeightPixels - mmToPixels(firstPageTopMarginMM) - mmToPixels(standardBottomMarginMM);
+        const subsequentPageContentHeight = pageHeightPixels - mmToPixels(standardTopMarginMM) - mmToPixels(standardBottomMarginMM);
+
+        // --- 2. Core Logic ---
+        $container.find("." + breakLineClass).remove(); // Clear old breaks
+        if ($container.css("position") === "static") {
+            $container.css("position", "relative");
+        }
+
+        let totalHeight = $container[0].scrollHeight;
+        let currentBreakY = firstPageContentHeight; // Y-coordinate for the first potential break
+        let lastBreakPosition = 0; // The Y-coordinate of the previously inserted break
+        let pageBreaks = [];
+
+        while (currentBreakY < totalHeight) {
+            // Find all candidate elements that start BEFORE the potential break line.
+            const $candidates = $container.find(breakableSelector).filter(function () {
+                return $(this).position().top < currentBreakY;
+            });
+
+            let $lastElementToKeep = null;
+            $candidates.each(function () {
+                // Check if the element's entire vertical space (including margin) fits above the line
+                if (($(this).position().top + $(this).outerHeight(true)) <= currentBreakY) {
+                    $lastElementToKeep = $(this);
+                }
+            });
+
+            let actualBreakY;
+            if ($lastElementToKeep && $lastElementToKeep.length > 0) {
+                // Insert the page break *after* the last element that fits completely.
+                const $breakVisual = $("<div></div>").addClass(breakLineClass);
+                $lastElementToKeep.after($breakVisual);
+                actualBreakY = $breakVisual.position().top;
+            } else {
+                // Fallback for very large elements: just add the break at the calculated position.
+                const $breakVisual = $("<div></div>").addClass(breakLineClass).css({
+                    position: 'absolute',
+                    top: currentBreakY + 'px',
+                    left: 0,
+                    width: '100%'
+                });
+                $container.append($breakVisual);
+                actualBreakY = currentBreakY;
+            }
+            pageBreaks.push(actualBreakY);
+            // IMPORTANT: Recalculate the next break position based on where the *actual* break was inserted.
+            currentBreakY = actualBreakY + subsequentPageContentHeight;
+
+            // Update total height in case adding the break line changed it.
+            totalHeight = $container[0].scrollHeight;
+        }
+        const totalPages = pageBreaks.length + 1;
+        $container.find("." + breakLineClass).each(function (index) {
+            const pageNumber = index + 2; // Pages start from 2 after the first break
+            $(this).attr('data-page-number', `Page ${pageNumber} of ${totalPages}`);
+        });
+        const newTotalHeight = $container[0].scrollHeight;
+        window.parent.postMessage({
+            action: 'iframePageBreaksInserted',
+            height: newTotalHeight
+        }, '*');
+    }
+
+
+    //Function to insert Page Break Lines
+    function insertPageBreakLines(interval) {
+        var $iframe = $("#currentResume");
+        var iframeDocument = $iframe[0].contentDocument;
+        var $container = $(iframeDocument.body);
+
+        // Ensure relative positioning
+        if ($container.css("position") === "static") {
+            $container.css("position", "relative");
+        }
+
+        // Remove any previously inserted lines
+        $container.find(".dynamic-page-break").remove();
+
+        // Use scrollHeight instead of .height() to get actual content height
+        var totalHeight = $container[0].scrollHeight;
+
+        for (var i = interval; i < totalHeight; i += interval) {
+            $("<div id='pageBreak'>&nbsp;</div>").css({
+                position: "absolute",
+                top: i + "px",
+                left: "0",
+                width: "100%",
+                borderTop: "2px dashed #ccc",
+                zIndex: 999
+            }).addClass("dynamic-page-break").appendTo($container);
+        }
+    }
+
+
+
+
+    window.addEventListener('message', function (event) {
+        if (event.data && event.data.action === 'iframeLoaded') {
+
+            var height = ($(pageSize).val() === "A4") ? 1122.24 : 1056;
+
+            //Uncomment for inserting page breaks
+            //updatePageBreaks();
+            //insertPageBreakLines(height);
+
+            //Letter Size: 11inch * 72 dpi = 792px;
+            //A4 Size: 11.69 inch * 72 dpi = 841.68;
+            var docHeight = Math.ceil(event.data.height);
+
+            var iframeHeight = ((docHeight / height) > 1 ? docHeight : height) + "px";
+
+            //25% of the width is reserved for the left section
+            var originalWidth = currentResumeIframe.style.width.replace('px', '');
+            var contWidth = $("#resumeContainer").width();
+            var ratio = (contWidth) / originalWidth;
+            if (ratio > 1)
+                ratio = 1;
+            $("#currentResume").css({
+                'height': iframeHeight,
+                'transform': "scale(" + ratio + ")",
+                '-webkit-transform': "scale(" + ratio + ")",
+                '-moz-transform': "scale(" + ratio + ")",
+                '-o-transform': "scale(" + ratio + ")",
+                '-ms-transform': "scale(" + ratio + ")",
+                '-webkit-transform-origin': "top left",
+                '-moz-transformtransform-origin': "top left",
+                '-ms-transformtransform-origin': "top left",
+                'transform-origin': "top left"
+            });
+
+            var resumeContainerHeight = Math.ceil((docHeight * ratio + 40)) + "px";
+            $("#resumeContainer").css({ 'height': resumeContainerHeight });
+        }
+        if (event.data && event.data.action === 'iframePageBreaksInserted') {
+            handlePageBreakInsertion(event);
+        }
+    })
+
+    function handlePageBreakInsertion() {
+        var height = ($(pageSize).val() === "A4") ? 1122.24 : 1056;
+        var docHeight = Math.ceil(event.data.height);
+        const numPages = Math.ceil(docHeight / height);
+        const desiredTotalHeight = numPages * height;
+
+        var iframeHeight = desiredTotalHeight + "px";
+
+        // This section of code is what you want to reuse
+        var originalWidth = currentResumeIframe.style.width.replace('px', '');
+        var contWidth = $("#resumeContainer").width();
+        var ratio = (contWidth) / originalWidth;
+        if (ratio > 1)
+            ratio = 1;
+        $("#currentResume").css({
+            'height': iframeHeight,
+            'transform': "scale(" + ratio + ")",
+            '-webkit-transform': "scale(" + ratio + ")",
+            '-moz-transform': "scale(" + ratio + ")",
+            '-o-transform': "scale(" + ratio + ")",
+            '-ms-transform': "scale(" + ratio + ")",
+            '-webkit-transform-origin': "top left",
+            '-moz-transformtransform-origin': "top left",
+            '-ms-transformtransform-origin': "top left",
+            'transform-origin': "top left"
+        });
+
+        var resumeContainerHeight = Math.ceil((desiredTotalHeight * ratio + 40)) + "px";
+        $("#resumeContainer").css({ 'height': resumeContainerHeight });
+    }
+
+    function FetchDocumentPreview() {
+        Builder.Loader.Append("#resumeContainer");
+        Builder.Http.Get({ url: Builder.Data.Get("GetPreviewAddress"), dataType: "html" }).done(bindDocHtml).always(
+            function () {
+                Builder.Loader.Remove("#resumeContainer");
+            });
+    }
+
+    function MissingCheckboxClick() {
+        var addVal = $hdnSaveGroups.val();
+        var additionalSectionsArr = addVal ? $hdnSaveGroups.val().split(",") : [];
+        if ($(this).is(":checked")) {
+            additionalSectionsArr.push($(this).val());
+        } else {
+            var index = additionalSectionsArr.indexOf($(this).val());
+            if (index > -1) {
+                additionalSectionsArr.splice(index, 1);
+            }
+        }
+        if (additionalSectionsArr.length) {
+            $selectOptionMessage.removeClass("display-block");
+        }
+        $hdnSaveGroups.val(additionalSectionsArr.join(","));
+    }
+
+    function AddToMissingSection(screenCD, sectionLabel) {
+        //This is a mobile case
+        if ($btnAddSectionContainer.hasClass("mobileBtnAddSection")) {
+            var $span = $("<span />").addClass("mobileAddSectionTitle").text(sectionLabel);
+            var $input = $("<input />").addClass("input")
+                .attr({ "type": "checkbox", "name": "add-group-options", "id": ("options-" + screenCD.toLowerCase()) })
+                .val(screenCD).on("click", MissingCheckboxClick);
+            var $label = $("<label />").addClass("check").attr("for", ("options-" + screenCD.toLowerCase()));
+            var $div = $("<div />").addClass("mobileAddSectionRow");
+            $div.append($span, $input, $label);
+            $("#mobileAddSection").append($div);
+        }
+        else {
+            var $span = $("<span />").addClass("sectionTitle").text(sectionLabel);
+            var $input = $("<input />").addClass("input")
+                .attr({ "type": "checkbox", "name": "add-group-options", "id": ("options-" + screenCD.toLowerCase()) })
+                .val(screenCD).on("click", MissingCheckboxClick);
+            var $label = $("<label />").addClass("check").attr("for", ("options-" + screenCD.toLowerCase()));
+            var $div = $("<div />").addClass("addSectionRow");
+            $div.append($span, $input, $label);
+            $btnAddSectionContainer.before($div);
+        }
+    }
+
+    function UpdateDocStyle(styles) {
+        if (!pendingStyleChanges) {
+            pendingStyleChanges = true;
+            Builder.Loader.Append("#resumeContainer");
+            Builder.Http.Post({
+                url: Builder.Data.Get("UpdateFormatAddress"),
+                data: { "styles": styles },
+                dataType: "html"
+            }).done(bindDocHtml).always(function () {
+                pendingStyleChanges = false;
+                Builder.Loader.Remove("#resumeContainer");
+            });
+        }
+    }
+
+    function UpdateSkin(skinCD) {
+        if (!pendingStyleChanges) {
+            pendingStyleChanges = true;
+            Builder.Loader.Append("#resumeContainer");
+            Builder.Http.Post({
+                url: Builder.Data.Get("UpdateTemplateAddress"),
+                data: { "templateCD": skinCD },
+                dataType: "html"
+            }).done(bindDocHtml).done(ToggleColorTheme.bind(null, skinCD)).always(function () {
+                pendingStyleChanges = false;
+                Builder.Loader.Remove("#resumeContainer");
+                CloseChangeTemplateOverlay();
+            });
+        }
+    }
+
+    function CloseChangeTemplateOverlay() {
+        var oldTabName = $("#changeTemplateContainer").hide().attr("data-old-tab-name");
+        $tabIcons.find("li[data-action-tabs=change-template]").removeClass("active");
+        $tabIcons.find("li[data-action-tabs=" + oldTabName + "]").addClass("active");
+        $tabContainer.find("[data-action-tab-cont=" + oldTabName + "]").show();
+        if ($mobileMenu && $mobileMenu.length)
+            $mobileMenu.removeClass("mobileModelShowData");
+
+        $("body").removeClass("overflowHidden");
+    }
+    function iframeZoom() {
+        var $this = $(this);
+        var contWidth = $this.parent().width(), ratio = (contWidth) / 226;
+        var IframeHeight = ($this.parent().height() - 10).toString() + "px";
+        $this.css({ 'height': IframeHeight }).contents().find("html").css({
+            'transform': "scale(" + ratio + ")",
+            '-webkit-transform': "scale(" + ratio + ")",
+            '-moz-transform': "scale(" + ratio + ")",
+            '-o-transform': "scale(" + ratio + ")",
+            '-ms-transform': "scale(" + ratio + ")",
+            '-webkit-transform-origin': "top left",
+            '-moz-transformtransform-origin': "top left",
+            '-ms-transformtransform-origin': "top left",
+            'transform-origin': "top left"
+        });
+    }
+
+    $(window).on("load",
+        function () {
+            $skinTemplates.find("iframe").each(iframeZoom);
+        });
+
+    function ToggleColorTheme(skinCD) {
+        $themeContainer.find("[data-template-cd]").each(function () {
+            var $this = $(this);
+            if ($this.attr("data-template-cd") == skinCD) {
+                $this.removeClass("display-none");
+            } else {
+                $this.addClass("display-none");
+            }
+        });
+    }
+
+    function BindDelete() {
+        $editContainer.find("button[data-action=delete]").on("click",
+            function (e) {
+                $("#btn-delete-group").attr("data-group-id", $(this).attr("data-group-id"));
+                var myModal = new bootstrap.Modal(document.getElementById('delete-modal'));
+                myModal.show();
+            });
+        $("#btn-delete-group").on("click",
+            function () {
+                var sectionId = $(this).attr("data-group-id");
+                var $sectionItem = $editContainer.find("[data-group-edit-id=" + sectionId + "]");
+                if ($sectionItem.length) {
+                    Builder.Http
+                        .Post({ "url": Builder.Data.Get("DeleteGroupAddress"), "data": { "groupId": sectionId } }).done(
+                            function (result) {
+                                if (result && result.success === true) {
+                                    if (result.isDocumentDeleted === true) {
+                                        location.href = Builder.Data.Get("DashboardAddress");
+                                    } else {
+                                        FetchDocumentPreview();
+                                        var screenCD = $sectionItem.attr("data-screen-cd");
+                                        var sectionLabel = $sectionItem.attr("data-section-label");
+                                        var sectionIcon = $sectionItem.attr("data-section-icon");
+                                        AddToMissingSection(screenCD, sectionLabel, sectionIcon);
+                                        $sectionItem.remove();
+                                        var myModalEl = document.getElementById('delete-modal');
+                                        var modal = bootstrap.Modal.getInstance(myModalEl);
+                                        modal.hide();
+                                    }
+                                }
+                            });
+                }
+            });
+    }
+
+    function BindSectionRename() {
+        $editContainer.find("button[data-action=rename]").on("click",
+            function (e) {
+                $("#txt-rename").val($(this).data("section-label"));
+                var myModal = new bootstrap.Modal(document.getElementById('rename-modal'));
+                myModal.show();
+                $("#btn-rename-section").attr("wizard", $(this).data("wizard"));
+                $("#btn-rename-section").attr("sectionid", $(this).data("section-id"));
+                $("#btn-rename-section").attr("sectiontypecd", $(this).data("sectiontypecd"));
+                $("#btn-rename-section").attr("data-original-name", $(this).data("section-label"));
+            });
+        $("#btn-rename-section").on("click",
+            function () {
+                var newName = $("#txt-rename").val().trim();
+                if (!newName) {
+                    return;
+                }
+                var originalName = $(this).data("original-name");
+                if (originalName.toLowerCase() == newName.toLowerCase()) {
+                    var myModalEl = document.getElementById('rename-modal');
+                    var modal = bootstrap.Modal.getInstance(myModalEl);
+                    modal.hide();
+                    return;
+                }
+
+                var wizard = $(this).attr("wizard");
+                var sectionTypeCD = $(this).attr("sectiontypecd");
+                var sectionId = $(this).attr("sectionid");
+                Builder.Http.Post({ "url": Builder.Data.Get("RenameSectionUrl"), "data": { "docId": Builder.Data.Get("DocumentId"), "sectionTypeCD": sectionTypeCD, "sectionLabel": newName, "wizard": wizard } }).done(
+                    function (data) {
+                        if (data) {
+                            FetchDocumentPreview();
+                            var sectionTitleIdSelector = "#sectionTitle-" + sectionId;
+                            $(sectionTitleIdSelector).text(newName);
+                            var myModalEl = document.getElementById('rename-modal');
+                            var modal = bootstrap.Modal.getInstance(myModalEl);
+                            modal.hide();
+                        }
+                    });
+            });
+    }
+
+    function BindAddSection() {
+        $("#addSection").on("focus",
+            "#txtOTHR",
+            function () {
+                $('#addSection :input[value="OTHR"]').attr("checked", "checked");
+                $(this).removeClass("invalid");
+                $("#errtxtOthers").removeClass("display-block");
+            });
+        $addCheckboxes.on("click", MissingCheckboxClick);
+        $("#btnAddSections").on("click",
+            function () {
+                var addVal = $hdnSaveGroups.val();
+                var additionalSectionsArr = addVal ? $hdnSaveGroups.val().split(",") : [];
+                if (additionalSectionsArr.length > 0) {
+                    $selectOptionMessage.removeClass("display-block");
+                    Builder.Http
+                        .Post({
+                            "url": Builder.Data.Get("SaveGroupAddress"),
+                            "data": { "sections": additionalSectionsArr, "otherText": $txtOther.val() }
+                        }).done(function (data) {
+                            if (data && data.result === true && data.nextRoute) {
+                                location.href = data.nextRoute;
+                            }
+                        });
+                } else {
+                    $selectOptionMessage.addClass("display-block");
+                }
+            });
+    }
+
+    function validateEmail() {
+        if (isOnceClicked) {
+            $("#errEmailTo").hide();
+            var $this = $("#recipient-address");
+            $this.removeClass("invalid");
+            var email = $this.val();
+            if (email) {
+                var emailRegex = new RegExp(Builder.Data.Get("EmailPattern"));
+                if (!emailRegex.test(email)) {
+                    $("#errEmailTo").show();
+                    $this.addClass("invalid");
+                    return false;
+                }
+            } else {
+                $("#errEmailTo").show();
+                $this.addClass("invalid");
+                return false;
+            }
+        }
+        return true;
+    }
+
+    function validateFromName() {
+        $("#errFromName").hide();
+        var $this = $("#from-name");
+        $this.removeClass("invalid");
+        var fromName = $this.val();
+        if (!fromName) {
+            $("#errFromName").show();
+            $this.addClass("invalid");
+            return false;
+        }
+        return true;
+    }
+
+    var isOnceClicked = false;
+
+    function BindInputs() {
+        $("#recipient-address").on("input", validateEmail);
+        $("#from-name").on("input", validateFromName);
+    }
+
+   
+
+    function BindBtnClicks() {
+        $("#downloadResume").on("click",
+            function (e) {
+                if (e && e.preventDefault()) {
+                    e.preventDefault();
+                }
+
+                if ($mobileMenu && $mobileMenu.length)
+                    $mobileMenu.removeClass("mobileModelShowData");
+
+                var $currentTab = $("#tab-icons").find("label.active");
+                if ($currentTab && $currentTab.length)
+                    $currentTab.removeClass("active");
+
+                //handlePremiumCheck(Builder.Data.Get("DownloadAddress"));
+                downloadDocument(Builder.Data.Get("DocumentTokenAddress"), Builder.Data.Get("DownloadAddress"));
+            });
+
+        $("#btnLinkedInSummary").on("click",
+            function () {
+                window.location.href = "../linkedin";
+            });
+
+        $("#btnOptimizeResume").on("click",
+            function () {
+                if ($mobileMenu && $mobileMenu.length)
+                    $mobileMenu.removeClass("mobileModelShowData");
+
+                var $currentTab = $("#tab-icons").find("label.active");
+                if ($currentTab && $currentTab.length)
+                    $currentTab.removeClass("active");
+                location.href = Builder.Data.Get("OptimizeResumeAddress");
+            }
+        );
+
+        $("#printResume").on("click",
+            function () {
+                //setTimeout(printDocument, 1000);
+                //var printContents = currentResumeIframe.contentDocument.body.innerHTML;
+                //var originalContents = document.body.innerHTML;
+                //document.body.innerHTML = printContents;
+                //window.print();
+
+                //document.body.innerHTML = originalContents;
+
+                const iframe = currentResumeIframe;
+                const iframeWindow = iframe.contentWindow;
+                const newWindow = window.open('', '', 'width=800,height=600');
+                newWindow.document.write(iframeWindow.document.documentElement.outerHTML);
+                newWindow.print();
+            });
+
+        function printDocument() {
+            currentResumeIframe.contentWindow.print({
+                margins: "default",
+                scale: "default",
+                backgroundGraphics: false,
+                header: false,
+                footer: false
+            });
+        }
+
+        $("#btnAddMoreSections").on("click",
+            function () {
+                if ($tabContainer && $tabContainer.length)
+                    $tabContainer.find("[data-action-tab-cont=edit]").hide();
+                $tabIcons.find("[data-action-tabs=edit]").removeClass("active");
+                $tabContainer.find("[data-action-tab-cont=add-section]").show();
+                $tabIcons.find("[data-action-tabs=add-section]").addClass("active");
+            });
+
+        $("#emailResume").on("click",
+            function () {
+                var myModal = new bootstrap.Modal(document.getElementById('email-modal'));
+                myModal.show();
+            });
+
+        $("#btn-email-section").on("click",
+            function () {
+                isOnceClicked = true;
+                var validation = [validateEmail(), validateFromName()];
+                if (validation.indexOf(false) > -1) {
+                    return;
+                }
+                var objEmail = {
+                    "recipientAddress": $("#recipient-address").val(),
+                    "fromName": $("#from-name").val(),
+                    "emailSubject": $("#email-subject").val(),
+                    "emailBody": $("#email-body").val()
+                };
+                Builder.Http.Post({ "url": Builder.Data.Get("EmailAddress"), "data": objEmail }).done(function (result) {
+                    if (result === true) {
+                        var myModalEl = document.getElementById('email-modal');
+                        var modal = bootstrap.Modal.getInstance(myModalEl);
+                        modal.hide();
+                    }
+                });
+            });
+        $("#closeIcon").on("click", CloseChangeTemplateOverlay);
+
+    }
+
+    function BindFormattingOptions() {
+        $("#fontFamily,#headingFontFamily,#fontSize input[type='radio'],#resumeMargin,#pageSize input[type='radio'],#resumeBg input[type='radio'],#photoSize input[type='radio'],#photoBorder input[type='radio'],#skillStyle input[type='radio'],#langStyle input[type='radio']").on("change", function () {
+            var $this = $(this);
+            var styleCD = $this.closest('[data-style-cd]').attr("data-style-cd");
+            var styleCDs = {};
+            styleCDs[styleCD] = $this.val();
+            UpdateDocStyle(styleCDs);
+
+            // Special handling for page size change
+            if ($this.closest("#pageSize").length) {
+                var pageSizeVal = $this.val();
+                if (pageSizeVal === "A4") {
+                    $("#currentResume").css({ 'width': '792.96px' });
+                } else if (pageSizeVal === "Letter") {
+                    $("#currentResume").css({ 'width': '816px' });
+                }
+            }
+
+            //If this is mobile, then hide the menu
+            if ($mobileMenu && $mobileMenu.length)
+                $mobileMenu.removeClass("mobileModelShowData");
+        });
+    }
+
+    function BindSkinChanges() {
+        $tabIcons.find("li").on("click",
+            function () {
+                var $currentTab = $tabIcons.find("li.active");
+                $currentTab.removeClass("active");
+                var oldTabName = $currentTab.attr("data-action-tabs");
+                $tabContainer.find("[data-action-tab-cont=" + oldTabName + "]").hide();
+                var newTabName = $(this).addClass("active").attr("data-action-tabs");
+                if (newTabName === "change-template") {
+                    $("#changeTemplateContainer").attr("data-old-tab-name", oldTabName).show();
+                    $("body").addClass("overflowHidden");
+                }                
+                else {
+                    if ($("#changeTemplateContainer").attr("data-old-tab-name")) {
+                        $("#changeTemplateContainer").attr("data-old-tab-name", "").hide();
+                        $("body").removeClass("overflowHidden");
+                    }
+                    $tabContainer.find("[data-action-tab-cont=" + newTabName + "]").show();
+                }
+            });
+        $themeContainer.find("[data-theme-cd]").on("click",
+            function () {
+                var themeCD = {};
+                themeCD[Builder.Data.Get("FormatOptionTheme")] = $(this).attr("data-theme-cd");
+                UpdateDocStyle(themeCD);
+            });
+        $skinTemplates.find("[data-template-cd]").on("click",
+            function () {
+                UpdateSkin($(this).attr("data-template-cd"));
+            });
+    }
+
+    function BindSkinMobileChanges() {
+        $tabIcons.find("label").on("click",
+            function () {
+                var $currentTab = $tabIcons.find("label.active");
+                $currentTab.removeClass("active");
+                var oldTabName = $currentTab.attr("data-action-tabs");
+                $tabContainer.find("[data-action-tab-cont=" + oldTabName + "]").hide();
+                $tabContainer.find("[data-action-tab-cont]").hide();
+                var newTabName = $(this).addClass("active").attr("data-action-tabs");
+                $tabContainer.find("[data-action-tab-cont=" + newTabName + "]").show();
+                if (newTabName === "change-template") {
+                    $("body").addClass("overflowHidden");
+                }
+                else if (newTabName == "linkedin-summary") {
+                    window.location.href = "../linkedin";
+                }
+                else {
+                    $("body").removeClass("overflowHidden");
+                }
+
+                if (newTabName == "edit" || newTabName == "format") {
+                    $("#moreModel").removeClass("modelShowModel");
+                }
+
+            });
+        $themeContainer.find("[data-theme-cd]").on("click",
+            function () {
+                var themeCD = {};
+                themeCD[Builder.Data.Get("FormatOptionTheme")] = $(this).attr("data-theme-cd");
+                UpdateDocStyle(themeCD);
+
+                if ($mobileMenu && $mobileMenu.length)
+                    $mobileMenu.removeClass("mobileModelShowData");
+            });
+        $skinTemplates.find("[data-template-cd]").on("click",
+            function () {
+                UpdateSkin($(this).attr("data-template-cd"));
+            });
+    }
+
+
+    function InitializeSorting() {
+        $editContainer.sortable({
+            items: "[data-group-edit-id]:not([data-screen-cd=" + Builder.Data.Get("UserDetailsScreenCode") + "])",
+            containment: $editContainer,
+            stop: function () {
+                var sortedSections = [];
+                $editContainer.find("[data-group-edit-id]").each(function (ind) {
+                    sortedSections.push({
+                        "groupId": $(this).attr("data-group-edit-id"),
+                        sortIndex: (ind + 1).toString()
+                    });
+                });
+                if (sortedSections && sortedSections.length) {
+                    Builder.Loader.Append("#resumeContainer");
+                    Builder.Http.Post({
+                        url: Builder.Data.Get("SortGroupAddress"),
+                        data: { "sortedGroups": sortedSections },
+                        dataType: "html"
+                    }).done(bindDocHtml).always(function () {
+                        Builder.Loader.Remove("#resumeContainer");
+                    });
+                }
+            }
+        });
+    }
+    function OnPreView() {
+
+        var previewActions = $tabIcons.find("li[preview-actions=m-preview]");
+        for (const action of previewActions) {
+            var id = action.id;
+            var id = action.id;
+            $(".navbar-nav li, .navbar-nav a, .navbar-nav ul").removeAttr('style');
+            $("#" + id).removeClass().addClass("dropdown-toggle");
+            $("#" + id + ".dropdown-toggle").find("a").eq(0).attr("data-bs-toggle", "dropdown").attr("aria-haspopup", "true").attr("aria-expanded", "false").append("<span class='caret'></span>");
+            $("a.selected").closest("li").addClass("active");
+            $("a.selected").closest(".dropdown-toggle").addClass("active");
+        }
+
+    }
+
+    async function isPremiumUser() {
+        return await Builder.Http.Get({ url: Builder.Data.Get("IsPremiumUserAddress") });
+    }
+
+    function isFreemiumPlanActive() {
+        Builder.Http.Get({ url: Builder.Data.Get("CheckFreemiumPlanActiveAddress") }).done(function (data) {
+            if (data) {
+                $("#upgradeToPremiumPlanBanner").removeClass("display-none");
+                $("#previewDataContainerDiv").removeClass("padding-top35");
+            }
+        });
+    }
+
+    /* Photo Image JS */
+
+    // Listen for messages from the iframe
+    window.addEventListener('message', function (event) {
+        if (event.data === 'openModal') {
+            openModal();
+        }
+    });
+
+    /* Photo Image JS Ends */
+
+    $(function () {
+        FetchDocumentPreview();
+        ToggleColorTheme(currentSkinCD);
+        BindInputs();
+        BindDelete();
+        BindSectionRename();
+        BindAddSection();
+        BindBtnClicks();
+        BindFormattingOptions();
+        BindSkinChanges();
+        BindSkinMobileChanges();
+        InitializeSorting();
+        OnPreView();
+        isFreemiumPlanActive();
+        const infoIcon = document.getElementById('info-icon');
+        const overlayMessage = document.getElementById('overlay-message');
+
+        // Function to show overlay
+        const showOverlay = () => {
+            overlayMessage.style.display = 'block'; // Show overlay
+        };
+
+        // Function to hide overlay
+        const hideOverlay = () => {
+            overlayMessage.style.display = 'none'; // Hide overlay
+        };
+
+        // Show overlay on hover for desktop
+        infoIcon.addEventListener('mouseover', showOverlay);
+
+        // Hide overlay on mouse out for desktop
+        infoIcon.addEventListener('mouseout', hideOverlay);
+
+        // Show overlay on click/tap for mobile and desktop
+        infoIcon.addEventListener('click', () => {
+            // Toggle the visibility of the overlay
+            overlayMessage.style.display = overlayMessage.style.display === 'block' ? 'none' : 'block';
+        });
+
+        // Close the overlay if the user clicks/taps anywhere outside the overlay
+        document.addEventListener('click', (event) => {
+            if (!infoIcon.contains(event.target) && !overlayMessage.contains(event.target)) {
+                hideOverlay(); // Hide overlay when clicking outside
+            }
+        });
+
+        // For mobile devices, also trigger show on touch
+        infoIcon.addEventListener('touchstart', showOverlay);
+    });
+
+    $(function () {
+        document.querySelectorAll('.st-filter-btn').forEach(button => {
+            button.addEventListener('click', function () {
+                document.querySelectorAll('.st-filter-btn').forEach(btn => btn.classList.remove('active'));
+                this.classList.add('active');
+                let filter = this.getAttribute('data-filter');
+                document.querySelectorAll('.st-template-card').forEach(card => {
+                    if (filter === 'all' || card.getAttribute('data-type') === filter) {
+                        card.style.display = 'block';
+                    } else {
+                        card.style.display = 'none';
+                    }
+                });
+            });
+        });
+    });
+
+})(jQuery, Builder);

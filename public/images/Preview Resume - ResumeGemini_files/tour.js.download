@@ -1,0 +1,416 @@
+﻿const dashboardTour = [
+    {
+        element: '#ddlDocument',
+        popover: {
+            title: 'Select Your Resume',
+            description: 'Choose the resume you want to work on from this dropdown. You can manage all your resumes from here.',
+            side: 'bottom'
+        }
+    },
+    {
+        element: '#btnEditResume',
+        popover: {
+            title: 'Edit Your Resume',
+            description: 'Click here to make changes to the selected resume. You can update your contact information, experience, and more.',
+            side: 'bottom'
+        }
+    },
+    {
+        element: '#btnDuplicateDocument',
+        popover: {
+            title: 'Duplicate Your Resume',
+            description: 'Create a copy of the selected resume. This is useful for creating different versions for different job applications.',
+            side: 'bottom'
+        }
+    },
+    {
+        element: '#btnRenameDocument',
+        popover: {
+            title: 'Rename Your Resume',
+            description: 'Change the name of your resume to keep things organized.',
+            side: 'bottom'
+        }
+    },
+    {
+        element: '#btnDeleteDocument',
+        popover: {
+            title: 'Delete Your Resume',
+            description: 'Permanently delete the selected resume. Be careful, this action cannot be undone.',
+            side: 'bottom'
+        }
+    },
+    {
+        element: '#btnDownloadDocument',
+        popover: {
+            title: 'Download Your Resume',
+            description: 'Download your resume in an ATS-compliant PDF format.',
+            side: 'bottom'
+        }
+    },
+    {
+        element: '#btnOptimizeDocument',
+        popover: {
+            title: 'AI Optimize Your Resume',
+            description: 'Use our AI-powered tool to optimize your resume for a specific job description. This will increase your chances of getting an interview.',
+            side: 'bottom'
+        }
+    }, {
+        element: '#btnAddCredits',
+        popover: {
+            title: 'Add AI Credits',
+            description: 'Use this option to buy more AI credits. AI credits help you use our AI features like optimizing the resume for a job description or improve LinkedIn summary.',
+            side: 'left'
+        }
+    },
+    {
+        element: '#btnOptimizeDocument2',
+        popover: {
+            title: 'AI Optimize',
+            description: 'Use our AI-powered tool to optimize your resume for a specific job description. This will increase your chances of getting an interview.',
+            side: 'left'
+        }
+    },
+    {
+        element: '#linkedinDashboard',
+        popover: {
+            title: 'LinkedIn Summary',
+            description: 'Use AI to generate LinkedIn summary and key skills to optimize your LinkedIn profile.',
+            side: 'left'
+        }
+    }
+];
+
+const mobileDashboardTour = [
+    {
+        element: '#ddlDocument',
+        popover: {
+            title: 'Select Your Resume',
+            description: 'Choose the resume you want to work on from this dropdown. You can manage all your resumes from here.',
+            side: 'bottom'
+        }
+    },
+    {
+        element: '#btnEditResume',
+        popover: {
+            title: 'Edit Your Resume',
+            description: 'Click here to make changes to the selected resume. You can update your contact information, experience, and more.',
+            side: 'top'
+        }
+    },
+    {
+        element: '#btnDuplicateDocument',
+        popover: {
+            title: 'Duplicate Your Resume',
+            description: 'Create a copy of the selected resume. This is useful for creating different versions for different job applications.',
+            side: 'top'
+        }
+    },
+    {
+        element: '#btnDownloadDocument',
+        popover: {
+            title: 'Download Your Resume',
+            description: 'Download your resume in an ATS-compliant PDF format.',
+            side: 'top'
+        }
+    },
+    {
+        element: '#btnOptimizeDocument',
+        popover: {
+            title: 'AI Optimize Your Resume',
+            description: 'Use our AI-powered tool to optimize your resume for a specific job description. This will increase your chances of getting an interview.',
+            side: 'top'
+        }
+    },
+    {
+        element: '#btnMoreOption',
+        popover: {
+            title: 'More Options',
+            description: 'Tap here to see more options like rename, delete and linkedIn summary.',
+            side: 'top'
+        }
+    },
+    {
+        element: '#btnAddCredits',
+        popover: {
+            title: 'Add AI Credits',
+            description: 'Use this option to buy more AI credits. AI credits help you use our AI features like optimizing the resume for a job description or improve LinkedIn summary.',
+            side: 'left'
+        }
+    },
+    {
+        element: '#btnOptimizeDocument2',
+        popover: {
+            title: 'AI Optimize',
+            description: 'Use our AI-powered tool to optimize your resume for a specific job description. This will increase your chances of getting an interview.',
+            side: 'left'
+        }
+    },
+    {
+        element: '#linkedinDashboard',
+        popover: {
+            title: 'LinkedIn Summary',
+            description: 'Use AI to generate LinkedIn summary and key skills to optimize your LinkedIn profile.',
+            side: 'left'
+        }
+    }
+];
+
+const mobilePreviewTour = [
+    {
+        element: '[data-action-tabs="edit"]',
+        popover: {
+            title: 'Edit Sections',
+            description: 'Tap here to edit the content of your resume sections.',
+            side: 'top'
+        }
+    },
+    {
+        element: '#downloadResume',
+        popover: {
+            title: 'Download Resume',
+            description: 'Download your resume in an ATS-compliant PDF format.',
+            side: 'top'
+        }
+    },
+    {
+        element: '#btnOptimizeResume',
+        popover: {
+            title: 'AI Optimize',
+            description: 'Use AI to optimize your resume for a specific job title or description.',
+            side: 'top'
+        }
+    },
+    {
+        element: '[data-action-tabs="format"]',
+        popover: {
+            title: 'Format Resume',
+            description: 'Change the look and feel of your resume.',
+            side: 'top'
+        }
+    },
+    {
+        element: '.moreMobile',
+        popover: {
+            title: 'More Options',
+            description: 'Tap here to see more options like change templates, color themes and add sections.',
+            side: 'top'
+        }
+    }
+];
+
+const previewTour = [
+    {
+        element: '[data-action-tabs="edit"]',
+        popover: {
+            title: 'Edit Sections',
+            description: 'Edit the content of each section of your resume or rename the section. You can also reorder the sections by dragging and dropping them.',
+            side: 'right'
+        }
+    },
+    {
+        element: '[data-action-tabs="format"]',
+        popover: {
+            title: 'Format Your Resume',
+            description: 'Change the font, font size, background and other formatting options to make your resume look exactly the way you want.',
+            side: 'right'
+        }
+    },
+    {
+        element: '[data-action-tabs="themes"]',
+        popover: {
+            title: 'Choose a Theme',
+            description: 'Select a color theme to make your resume stand out. We have a variety of themes to choose from.',
+            side: 'right'
+        }
+    },
+    {
+        element: '[data-action-tabs="add-section"]',
+        popover: {
+            title: 'Add New Sections',
+            description: 'Add new sections to your resume, such as "Skills", "Languages", or "Certifications".',
+            side: 'right'
+        }
+    },
+    {
+        element: '[data-action-tabs="change-template"]',
+        popover: {
+            title: 'Change Template',
+            description: 'Change the template on the click of a button, choose from our library of professionally designed templates.',
+            side: 'right'
+        }
+    },
+    {
+        element: '#downloadResume',
+        popover: {
+            title: 'Download Resume',
+            description: 'Once you are satisfied, download your resume in an ATS-compliant PDF format.',
+            side: 'bottom'
+        }
+    },
+    {
+        element: '#btnOptimizeResume',
+        popover: {
+            title: 'Optimize Resume',
+            description: 'Use AI to optimize your resume for a specific job title or description. Your original resume stays intact and a copy is created.',
+            side: 'bottom'
+        }
+    }, {
+        element: '#btnLinkedInSummary',
+        popover: {
+            title: 'LinkedIn Summary',
+            description: 'Use AI to generate LinkedIn summary and key skills to optimize your LinkedIn profile.',
+            side: 'bottom'
+        }
+    }
+];
+
+const experienceReviewTour = [
+    {
+        element: '#expSortId',
+        popover: {
+            title: 'Drag to reorder',
+            description: 'Simply drag and drop to change the order of your work experiences. Place your most impactful roles at the top.',
+            side: 'bottom'
+        }
+    },
+    {
+        element: '#expEditId',
+        popover: {
+            title: 'Edit Experience',
+            description: 'Click here to edit the details of this role. Keep your job titles, companies, and descriptions accurate and up-to-date.',
+            side: 'bottom'
+        }
+    }, {
+        element: '#expDeleteId',
+        popover: {
+            title: 'Delete Experience',
+            description: 'Remove this work experience if it’s no longer relevant to your resume.',
+            side: 'bottom'
+        }
+    }, {
+        element: '#addExperienceSection',
+        popover: {
+            title: 'Add More Experience',
+            description: 'Click here to add another position and build out your complete career history.',
+            side: 'top'
+        }
+    }
+];
+
+const educationReviewTour = [
+    {
+        element: '#eduSortId',
+        popover: {
+            title: 'Drag to reorder',
+            description: 'Drag and drop to reorder your education. List your most recent or relevant qualifications first to make them stand out.',
+            side: 'bottom'
+        }
+    },
+    {
+        element: '#eduEditId',
+        popover: {
+            title: 'Edit Education',
+            description: 'Need to make a change? Click here to edit your degree, institution, or dates to keep your academic information current.',
+            side: 'bottom'
+        }
+    }, {
+        element: '#eduDeleteId',
+        popover: {
+            title: 'Delete Education',
+            description: 'Remove an education entry if it is no longer needed. Don’t worry—this action only deletes the selected entry.',
+            side: 'bottom'
+        }
+    }, {
+        element: '#addDegreeSection',
+        popover: {
+            title: 'Add Another Degree',
+            description: 'Click to add another degree, diploma, or certification to make your educational background even stronger.',
+            side: 'top'
+        }
+    }
+];
+
+
+document.addEventListener('DOMContentLoaded', function () {
+    const driver = window.driver.js.driver;
+
+    function startTour(tour) {
+        const driverObj = driver({
+            showProgress: true,
+            steps: tour,
+            nextBtnText: 'Next',
+            prevBtnText: 'Previous',
+            doneBtnText: 'Done'
+        });
+        driverObj.drive();
+    }
+
+    const page = window.location.pathname;
+    let tour;
+    let tourName;
+
+    if (page.includes('/dashboard')) {
+        tour = dashboardTour;
+        tourName = 'hasSeenDashboardTour';
+    } else if (page.includes('/preview')) {
+        const isMobile = !!document.querySelector('.fixedMobileBottom');
+        tour = isMobile ? mobilePreviewTour : previewTour;
+        tourName = isMobile ? 'hasSeenMobilePreviewTour' : 'hasSeenPreviewTour';
+    }
+    //else if (page.includes('/experience-details')) {
+    //    tour =  experienceReviewTour;
+    //    tourName =  'hasSeenExperienceReviewTour';
+    //} else if (page.includes('/academics-details')) {
+    //    tour =  educationReviewTour;
+    //    tourName =  'hasSeenEduReviewTour';
+    //}
+
+    if (tour) {
+        const hasSeenTour = localStorage.getItem(tourName);
+        if (!hasSeenTour) {
+            startTour(tour);
+            localStorage.setItem(tourName, 'true');
+        }
+    }
+
+
+    const helpIcon = document.getElementById('tour-help-icon');
+    if (helpIcon) {
+        helpIcon.addEventListener('click', function (e) {
+            e.preventDefault();
+            if (page.includes('/dashboard')) {
+                startTour(dashboardTour);
+            } else if (page.includes('/preview')) {
+                //const isMobile = !!document.querySelector('.fixedMobileBottom');
+                //const tour = isMobile ? mobilePreviewTour : previewTour;
+                startTour(previewTour);
+            } else if (page.includes('/experience-details')) {
+                startTour(experienceReviewTour);
+
+            } else if (page.includes('/academics-details')) {
+                startTour(educationReviewTour);
+
+            }
+        });
+    }
+
+    const helpTourMoblie = document.getElementById('tour-help-mobile');
+    const hideMenuMobile = document.getElementById('mobileSideMenu');
+    if (helpTourMoblie) {
+        helpTourMoblie.addEventListener('click', function (e) {
+            if (hideMenuMobile) {
+                hideMenuMobile.classList.remove("mobileSideMenuShow");
+            }
+            e.preventDefault();
+            if (page.includes('/dashboard')) {
+                startTour(mobileDashboardTour);
+            } else if (page.includes('/preview')) {
+                startTour(mobilePreviewTour);
+            } else if (page.includes('/experience-details')) {
+                startTour(experienceReviewTour);
+            } else if (page.includes('/academics-details')) {
+                startTour(educationReviewTour);
+            }
+        });
+    }
+});

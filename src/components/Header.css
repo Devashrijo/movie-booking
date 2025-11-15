@@ -1,0 +1,168 @@
+* {
+  margin: 0;
+  padding: 0;
+  font-family: Arial, Helvetica, sans-serif;
+}
+
+.header-container {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 5px 3px 5px 6px;
+  background-color: white;
+  border: 2px solid lightgrey;
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+}
+
+.header-content-box {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.circle-img {
+  height: 47px;
+  width: 47px;
+  border-radius: 50%;
+  overflow: hidden;
+}
+
+.circle-img img {
+  height: 100%;
+  width: 100%;
+  object-fit: cover;
+  border-radius: 50%;
+  transform: scale(1.1);
+}
+
+.logo-name {
+  color: black;
+  font-size: 17px;
+  font-weight: bold;
+  text-align: center;
+}
+.search-bar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  border: 2px solid #ccc;
+  border-radius: 25px;
+  background: #fff;
+  width: 300px;
+}
+.search-bar:hover {
+  border: 2px solid black;
+}
+.search-bar img {
+  width: 30px;
+  height: 20px;
+  transform: scale(1.5);
+  padding-left: 2px;
+}
+
+.search-bar .search {
+  border: none;
+  outline: none;
+  flex: 1;
+  font-size: 14px;
+}
+.header-right-side .nav-links {
+  list-style: none;
+  display: flex;
+  align-items: center;
+  gap: 3px;
+}
+
+.header-right-side .nav-links li a {
+  text-decoration: none;
+  color: black;
+  font-weight: 500;
+  transition: color 0.3s ease;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  margin-right: 7px;
+  padding: 10px 15px;
+  border-radius: 20px;
+  transition: all 0.3s ease;
+}
+.nav-links li a:hover {
+  background-color: rgb(255, 203, 5);
+  color: white;
+  transform: scale(1.05);
+}
+
+/* Login Icon */
+.login-icon {
+  width: 50px;
+  height: 43px;
+  border-radius: 40px;
+}
+/* Burger menu (hidden on desktop) */
+.burger {
+  display: none;
+  flex-direction: column;
+  cursor: pointer;
+  gap: 5px;
+}
+
+.burger div {
+  width: 25px;
+  height: 3px;
+  background: black;
+  transition: 0.3s;
+}
+.mic-icon {
+  width: 22px;
+  height: 22px;
+  margin-left: 10px;
+  cursor: pointer;
+  transition: transform 0.3s ease;
+}
+
+.mic-icon.listening {
+  transform: scale(1.2);
+  filter: drop-shadow(0 0 5px red);
+}
+
+.search-icon {
+  cursor: pointer;
+  margin-right: 5px;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  /* ✅ keep search bar visible */
+  .search-bar {
+    width: 180px; /* shrink a bit for mobile */
+  }
+
+  .header-right-side {
+    display: none;
+    position: absolute;
+    top: 65px;
+    right: 10px;
+    background: white;
+    border: 1px solid #ddd;
+    padding: 15px;
+    border-radius: 8px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+    z-index: 10;
+  }
+
+  .header-right-side.active {
+    display: block;
+  }
+
+  .header-right-side .nav-links {
+    flex-direction: column;
+    gap: 15px;
+  }
+
+  .burger {
+    display: flex;
+  }
+}

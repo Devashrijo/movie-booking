@@ -1,0 +1,210 @@
+﻿let cropper;
+
+// Function to open the modal
+function openModal() {
+    // Reset file input
+    const fileInput = document.getElementById('imageUpload');
+    fileInput.value = '';
+
+    // Reset image preview
+    const imageElement = document.getElementById('image');
+    imageElement.src = '';
+
+    // Destroy existing cropper instance
+    if (cropper) {
+        cropper.destroy();
+        cropper = null;
+    }
+
+    // Reset UI elements
+    document.getElementById('fileName').innerText = '';
+    document.getElementById('fileSize').innerText = '';
+    document.getElementById('uploadDragDrop').style.display = 'flex';
+    document.getElementById('cropButton').style.display = 'none';
+    document.getElementById('errorMessage').style.display = 'none';
+
+    document.getElementById('uploadModal').style.display = 'block';
+    document.getElementById('overlay').style.display = 'block';
+}
+
+// Function to close the modal
+function closeModal() {
+    document.getElementById('uploadModal').style.display = 'none';
+    document.getElementById('overlay').style.display = 'none';
+}
+
+// Event listener for the Cancel button
+document.getElementById('cancelButton').addEventListener('click', function () {
+    closeModal();
+});
+
+var deleteButton = document.getElementById('btnImageDelete');
+if (deleteButton) {
+    document.getElementById('btnImageDelete').addEventListener('click', function () {
+        var myModal = new bootstrap.Modal(document.getElementById('delete-modal'));
+        myModal.show();
+    });
+    $("#btn-delete-Image").on("click",
+        function () {
+
+            var fileURL = document.getElementById('resumePhoto').src;
+            var docId = Builder.Data.Get("DocumentId");
+            var pathName = new URL(fileURL).pathname;
+
+            // Extract the filename from the path
+            var fileName = pathName.substring(pathName.lastIndexOf('/') + 1);
+            Builder.Http.Post({ "url": Builder.Data.Get("DeletePhotoURL"), "data": { "docId": docId, "fileName": fileName } }).done(
+                function (result) {
+                    if (result && result.IsSuccess === true) {
+                        Builder.BrowserRepo.Set(Builder.Data.Get("DocumentId"), "userimage", null);
+                        const resumePhoto = document.getElementById('resumePhoto');
+                        if (resumePhoto) {
+                            resumePhoto.src = "/images/user-icon.png";
+                        }
+                            const iframe = document.getElementById('currentResume');
+                            var imageDiv = document.getElementById('imageEditDiv')
+                            if (iframe) {
+
+                            }
+                            if (imageDiv) {
+                                //Hide the edit div and show upload div
+                                imageDiv.style.display = 'none';
+                                document.getElementById('imageUploadDiv').style.display = 'inline-block';
+                                $("#delete-modal").modal("hide");
+                            }                        
+                    }
+                });
+        });
+}
+
+
+document.getElementById('imageUpload').addEventListener('change', function (event) {
+    const file = event.target.files[0];
+    const errorMessage = document.getElementById('errorMessage');
+    const cropButton = document.getElementById('cropButton');
+    const uploadDragDrop = document.getElementById('uploadDragDrop');
+    const fileName = document.getElementById('fileName');
+    const fileSize = document.getElementById('fileSize');
+    // Reset error message and disable crop button initially
+    errorMessage.style.display = 'none';
+    cropButton.style.display = 'none';
+    cropButton.disabled = true;
+
+    if (file) {
+        const validFormats = ['image/jpeg', 'image/png', 'image/webp'];
+        const maxSize = 5 * 1024 * 1024; // 5 MB
+
+        // File type validation
+        if (!validFormats.includes(file.type)) {
+            errorMessage.innerText = "Invalid file format! Only .jpg, .jpeg, .png, and .webp are allowed.";
+            errorMessage.style.display = 'block';
+            return;
+        }
+
+        // File size validation
+        if (file.size > maxSize) {
+            errorMessage.innerText = "File size exceeds 5 MB limit!";
+            errorMessage.style.display = 'block';
+            return;
+        }
+
+        // Proceed with image preview and cropping
+        const reader = new FileReader();
+        reader.onload = function (e) {
+            const imageElement = document.getElementById('image');
+            imageElement.src = e.target.result;
+            fileName.innerText = "Selected Image: " + file.name;
+            fileSize.innerText = " (" + Math.round((file.size) / 1024, 2) + " KB)";
+            // Initialize the cropper
+            if (cropper) {
+                cropper.destroy();
+            }
+            cropper = new Cropper(imageElement, {
+                aspectRatio: 1, // Maintain aspect ratio (optional)
+                viewMode: 1, // Restrict image movement
+                autoCropArea: 0.8, // Default cropping area size
+                cropBoxResizable: true, // Allow resizing of the crop box
+            });
+
+            uploadDragDrop.style.display = 'none';
+            cropButton.style.display = 'block';
+            cropButton.disabled = false; // Enable crop button after successful validation
+        };
+        reader.readAsDataURL(file);
+    }
+});
+
+
+document.getElementById('cropButton').addEventListener('click', function () {
+    const canvas = cropper.getCroppedCanvas({
+        width: 400,
+        height: 400,
+    });
+
+    // Convert the canvas to a base64 image
+    const croppedImage = canvas.toDataURL('image/jpeg');
+
+    // Send the cropped image to the server
+    uploadCroppedImage(croppedImage);
+});
+
+function uploadCroppedImage(croppedImage) {
+    const formData = new FormData();
+
+    // Assuming 'croppedImage' is a base64 string (without data URL prefix 'data:image/jpeg;base64,')
+    const byteString = atob(croppedImage.split(',')[1]); // Decoding base64 string to raw bytes
+    const arrayBuffer = new ArrayBuffer(byteString.length);
+    const uintArray = new Uint8Array(arrayBuffer);
+
+    for (let i = 0; i < byteString.length; i++) {
+        uintArray[i] = byteString.charCodeAt(i);
+    }
+
+    // Create a Blob from the array buffer (image type)
+    const blob = new Blob([uintArray], { type: 'image/jpeg' }); // Change the MIME type if needed (e.g., image/png)
+
+    // Append the Blob as a file to FormData
+    formData.append('uploadedPhoto', blob, 'cropped-photo.jpg');
+    formData.append("docId", Builder.Data.Get("DocumentId"));
+
+    //formData.append("image", croppedImage);
+    Builder.Http.FileUpload({
+        url: Builder.Data.Get("UploadPhotoURL"), data: formData
+    }).done(function (data) {
+        try {
+            var response = JSON.parse(data);
+            if (response && response.IsSuccess) {
+                closeModal();
+                updateIframePhoto(response.uploadedPath);
+            }
+        }
+        catch (e) {
+            errorMessage.innerText = "There was a problem in uploading your photo, please retry!";
+            errorMessage.style.display = 'block';
+        }
+    })
+        .fail(function () {
+            errorMessage.innerText = "There was a problem in uploading your photo, please retry!";
+            errorMessage.style.display = 'block';
+        });
+}
+
+function updateIframePhoto(imageUrl) {
+    Builder.BrowserRepo.Set(Builder.Data.Get("DocumentId"), "userimage", { "userImage": imageUrl });
+    // Access the iframe and send a message to it with the new image URL
+    const iframe = document.getElementById('currentResume');
+    const imageUploadDiv = document.getElementById('imageUploadDiv');
+    const imageEditDiv = document.getElementById('imageEditDiv');
+    const resumePhoto = document.getElementById('resumePhoto');
+    if (iframe) {
+        // Send a message to the iframe with the image URL
+        iframe.contentWindow.postMessage({ type: 'updatePhoto', url: imageUrl }, window.location.origin);
+    }
+
+    if (resumePhoto) {
+        //Update the src of the image to be shown in the preview as imageUrl
+        imageEditDiv.style.display = 'inline-block';
+        imageUploadDiv.style.display = 'none';
+        resumePhoto.src = imageUrl;
+    }
+}

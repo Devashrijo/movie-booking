@@ -1,0 +1,220 @@
+﻿    (function($, Builder) {
+    function browserRepoFactory() {
+        var docKeyPrefix = "__doc__";
+        var cacheInMin = 100;
+        var hasStorage = false;
+        var storage = window.sessionStorage;
+
+        function isStorageAvailable() {
+            try {
+                var verify = "verify";
+                if (storage) {
+                    storage.setItem(verify, "1");
+                    storage.removeItem(verify);
+                    return true;
+                } else {
+                    return false;
+                }
+            } catch (error) {
+                return false;
+            }
+        }
+
+        this.Initialize = function() {
+            hasStorage = isStorageAvailable();
+        };
+        this.Get = function(docId, name) {
+            if (hasStorage === true) {
+                var docKey = docKeyPrefix + docId;
+                var docStr = storage.getItem(docKey);
+                if (docStr) {
+                    var doc = JSON.parse(docStr);
+                    if (doc && doc.timestamp) {
+                        var timestamp = (new Date()).getTime();
+                        if (doc.timestamp > timestamp) {
+                            if (doc.data[name] && doc.data[name].timestamp && doc.data[name].timestamp > timestamp) {
+                                return doc.data[name].data;
+                            }
+                        } else {
+                            /// Remove to save memory at client.
+                            storage.removeItem(docKey);
+                        }
+                    }
+                }
+            }
+            return null;
+        };
+        this.Set = function(docId, name, data) {
+            if (hasStorage === true) {
+                var docKey = docKeyPrefix + docId;
+                var timestamp = new Date(new Date().getTime() + cacheInMin * 60000).getTime();
+                var doc = null;
+                var docStr = storage.getItem(docKey);
+                if (docStr) {
+                    doc = JSON.parse(docStr);
+                }
+                if (!doc) {
+                    doc = {};
+                }
+                if (!doc.data) {
+                    doc.data = {};
+                }
+                if (!doc.data[name]) {
+                    doc.data[name] = {};
+                }
+                doc.timestamp = timestamp;
+                doc.data[name].timestamp = timestamp;
+                doc.data[name].data = data;
+                storage.setItem(docKey, JSON.stringify(doc));
+                return true;
+            }
+            return false;
+        };
+        this.Remove = function(docId) {
+            if (hasStorage === true) {
+                var docKey = docKeyPrefix + docId;
+                storage.removeItem(docKey);
+            }
+        };
+    }
+
+    function trackerFactory() {
+        var isInitialized = false;
+        var trackerStack = [];
+
+        function tracker(obj) {
+            var _initValue = null;
+            var _obj = obj;
+            this.GetField = function() {
+                return _obj.field;
+            };
+            this.GetValue = function() {
+                return _obj.val();
+            };
+            this.SetValue = function(val) {
+                return _obj.val(val);
+            };
+            this.SetInitValue = function() {
+                _initValue = _obj.val();
+            };
+            this.HasField = function(field, fieldGroup) {
+                return field === obj.field && fieldGroup === obj.fieldGroup;
+            };
+            this.HasFieldGroup = function(fieldGroup) {
+                return fieldGroup === obj.fieldGroup;
+            };
+            this.HasChanged = function() {
+                return _initValue !== _obj.val();
+            };
+        }
+
+        this.Initialize = function(obj) { isInitialized = true; };
+        this.Record = function() {
+            if (isInitialized === true) {
+                var len = trackerStack.length;
+                if (len > 0) {
+                    for (var i = 0; i < len; i++) {
+                        trackerStack[i].SetInitValue();
+                    }
+                }
+            }
+        };
+        this.Select = function(obj) {
+            if (isInitialized === true) {
+                if (obj) {
+                    var $selector = $(obj.selector);
+                    $selector.each(function() {
+                        trackerStack.push(new tracker({
+                            field: obj.infoField || $(this).attr("info-field"),
+                            fieldGroup: obj.infoFieldGroup || $(this).attr("info-field-group"),
+                            val: (function() {
+                                if (obj.val) {
+                                    return obj.val;
+                                }
+                                switch (($(this).attr("type") || "").trim().toLowerCase()) {
+                                case "checkbox":
+                                    return function(val) {
+                                        if (typeof val === "undefined") {
+                                            return $(this).prop("checked");
+                                        } else {
+                                            $(this).prop("checked", val);
+                                        }
+                                    }.bind(this);
+                                }
+                                return function(val) {
+                                    if (typeof val === "undefined") {
+                                        return $(this).val();
+                                    } else {
+                                        $(this).val(val);
+                                    }
+                                }.bind(this);
+                            }.bind(this))()
+                        }));
+                    });
+                }
+            }
+        };
+        this.IsDirty = function() {
+            if (isInitialized === true) {
+                var len = trackerStack.length;
+                if (len > 0) {
+                    for (var i = 0; i < len; i++) {
+                        if (trackerStack[i].HasChanged() === true) {
+                            return true;
+                        }
+                    }
+                    return false;
+                }
+            }
+            return true;
+        };
+        this.Get = function(fieldGroup) {
+            var obj = null;
+            if (isInitialized === true) {
+                obj = {};
+                var len = trackerStack.length;
+                if (len > 0) {
+                    for (var i = 0; i < len; i++) {
+                        if (trackerStack[i].HasFieldGroup(fieldGroup)) {
+                            obj[trackerStack[i].GetField()] = trackerStack[i].GetValue();
+                        }
+                    }
+                }
+            }
+            return obj;
+        };
+        this.Set = function(fieldGroup, data) {
+            if (isInitialized === true) {
+                var len = trackerStack.length;
+                if (len > 0) {
+                    for (var i = 0; i < len; i++) {
+                        if (trackerStack[i].HasFieldGroup(fieldGroup)) {
+                            for (var field in data) {
+                                if (trackerStack[i].HasField(field, fieldGroup)) {
+                                    trackerStack[i].SetValue(data[field]);
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        };
+    }
+
+    function accordian() {
+        $("[data-accordian-title]").on("click",
+            function() {
+                $(this).find("i").toggleClass("on");
+                var acc = $(this).attr("data-accordian-title");
+                $("[data-accordian-container=" + acc + "]").toggleClass("collapsedAdvice expandedAdvice");
+            });
+    }
+
+    (function init() {
+        Builder.BrowserRepo = new browserRepoFactory();
+        Builder.BrowserRepo.Initialize();
+        Builder.State = new trackerFactory();
+        Builder.State.Initialize();
+        accordian();
+    })();
+})(jQuery, Builder);

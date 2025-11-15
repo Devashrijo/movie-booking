@@ -1,0 +1,61 @@
+* {
+  margin: 0;
+  padding: 0;
+  font-family: Arial, Helvetica, sans-serif;
+}
+.screen-container {
+  display: inline-flex;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+  margin-top: 20px;
+}
+.screen-design {
+  border: 2px solid black;
+  height: 3px;
+  width: 70%;
+  max-width: 800px;
+  border-radius: 100px;
+  box-shadow: 5px 8px 8px #88888857;
+}
+.screen-design h3 {
+  color: black;
+  text-align: center;
+  font-size: 18px;
+  font-weight: bold;
+  margin-top: 10px;
+  margin-bottom: 12px;
+}
+.seats-info-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-bottom: 30px;
+  text-align: center;
+  max-width: 100%;
+}
+.available-box,
+.selected-box,
+.sold-box {
+  background-color: #fff;
+  border: 1px solid #7a7a7a;
+  border-radius: 2px;
+  height: 12px;
+  margin-right: 5px;
+  width: 12px;
+  margin-left: 3px;
+}
+h6 {
+  font-size: 14px;
+  color: grey;
+  font-weight: 600;
+  margin-right: 5px;
+}
+.selected-box {
+  background-color: #facc15;
+  border: none;
+}
+.sold-box {
+  background-color: rgb(218, 211, 211);
+  border: none;
+}

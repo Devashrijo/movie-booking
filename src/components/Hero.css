@@ -1,0 +1,174 @@
+.hero {
+  position: relative;
+  width: 100%;
+  height: 90vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-position: center;
+  background-size: cover;
+  color: white;
+  overflow: hidden;
+  transition: background-image 1s ease-in-out;
+}
+
+.overlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.5);
+  z-index: 1;
+}
+
+.hero-content {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 85%;
+  max-width: 1200px;
+  gap: 2rem;
+  animation: fadeIn 1s ease-in-out;
+}
+
+/* FADE ANIMATION */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* LEFT SIDE INFO */
+.hero-info {
+  flex: 1;
+}
+
+.hero-info h1 {
+  font-size: 2.8rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  margin-bottom: 1rem;
+}
+
+.hero-info p {
+  font-size: 1rem;
+  line-height: 1.6;
+  color: #e5e5e5;
+  max-width: 600px;
+  margin-bottom: 1rem;
+}
+
+.hero-details {
+  font-size: 0.95rem;
+  margin-bottom: 1rem;
+  color: #d1d1d1;
+}
+
+/* BOOK BUTTON */
+.book-btn {
+  background-color: #facc15;
+  color: #000;
+  font-weight: bold;
+  border: none;
+  border-radius: 8px;
+  padding: 12px 24px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-size: 1rem;
+}
+
+.book-btn:hover {
+  background-color: #eab308;
+  transform: scale(1.05);
+}
+
+/* POSTER */
+.hero-poster img {
+  width: 300px;
+  border-radius: 14px;
+  box-shadow: 0 0 25px rgba(255, 255, 255, 0.2);
+  transition: transform 0.3s ease;
+  border-radius: 45px;
+  top: 5px;
+}
+
+.hero-poster img:hover {
+  transform: scale(1.03);
+}
+
+/* STATUS BADGE */
+.status-badge {
+  display: inline-block;
+  padding: 6px 14px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  border-radius: 20px;
+  margin-bottom: 0.8rem;
+  border: none;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.status-badge.new-release {
+  background-color: #22c55e;
+  color: white;
+}
+
+.status-badge.upcoming {
+  background-color: #facc15;
+  color: #000;
+}
+
+.status-badge.re-release {
+  background-color: #3b82f6;
+  color: white;
+}
+/* Dots Container */
+.dots-container {
+  position: absolute;
+  bottom: 10px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  gap: 10px;
+  z-index: 10;
+}
+
+/* Individual Dot */
+.dot {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background-color: rgba(255, 255, 255, 0.4);
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+/* Hover and Active */
+.dot:hover,
+.dot.active {
+  background-color: rgb(250, 204, 21); /* #facc15 */
+  transform: scale(1.2);
+}
+
+/* RESPONSIVE */
+@media (max-width: 950px) {
+  .hero-content {
+    flex-direction: column;
+    text-align: center;
+  }
+
+  .hero-info h1 {
+    font-size: 2.2rem;
+  }
+
+  .hero-poster img {
+    width: 240px;
+    margin-top: 1rem;
+  }
+}
