@@ -1,7 +1,7 @@
 import "./Bill.css";
 import { useNavigate } from "react-router-dom";
 
-const gstRate = 0.18; // 18%
+const gstRate = 0.18;
 
 function Bill({ selectedSeats, movie, time }) {
   const navigate = useNavigate();

@@ -5,30 +5,7 @@ import "./Header.css";
 const Header = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [query, setQuery] = useState("");
-  const [listening, setListening] = useState(false);
   const navigate = useNavigate();
-
-  const handleMicClick = async () => {
-    try {
-      if (!listening) {
-        setListening(true);
-        await client.initialize();
-        await client.startContext();
-
-        client.onSegmentChange((segment) => {
-          if (segment.text) {
-            setQuery(segment.text);
-          }
-        });
-      } else {
-        await client.stopContext();
-        setListening(false);
-      }
-    } catch (error) {
-      console.error("Mic error:", error);
-      setListening(false);
-    }
-  };
 
   const handleSearch = () => {
     if (query.trim()) {
@@ -42,16 +19,9 @@ const Header = () => {
         <div className="circle-img">
           <img src="/images/movie-logo.webp" alt="logo" />
         </div>
-
         <span className="logo-name">Filmio</span>
 
         <div className="search-bar">
-          <img
-            src="/images/search-icon.png"
-            alt="search"
-            onClick={handleSearch}
-            className="search-icon"
-          />
           <input
             type="text"
             placeholder="Search Your Favorite Movie"
@@ -60,10 +30,10 @@ const Header = () => {
             onChange={(e) => setQuery(e.target.value)}
           />
           <img
-            src="/images/mic-icon.png"
-            alt="mic"
-            onClick={handleMicClick}
-            className={`mic-icon ${listening ? "listening" : ""}`}
+            src="/images/search-icon.png"
+            alt="search"
+            onClick={handleSearch}
+            className="search-icon"
           />
         </div>
       </div>

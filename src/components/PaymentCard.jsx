@@ -37,6 +37,10 @@ function PaymentCard({
   const gstFixed = Number.isFinite(safeGst) ? safeGst : 0;
   const totalFixed = Number.isFinite(safeTotal) ? safeTotal : 0;
 
+  useEffect(() => {
+    setFinalTotal(totalFixed);
+  }, [totalFixed]);
+
   const applyCoupon = () => {
     if (coupon === "MOVIE50") {
       const newTotal = totalFixed * 0.5;
@@ -56,57 +60,50 @@ function PaymentCard({
   };
 
   const handlePayment = async () => {
-    const paymentData = {
-      name,
-      cardNumber,
-      expiry,
-      cvv,
-      amount: finalTotal || totalFixed,
+    const amountToPay = finalTotal || totalFixed;
+
+    const showId = movie?.show_id || movie?.id || item?.show_id || item?.id;
+
+    if (!showId) {
+      alert("❌ Missing show_id");
+      return;
+    }
+
+    const payload = {
+      user_id: userId,
+      show_id: showId,
+      seat_numbers:
+        selectedSeats.length > 0
+          ? selectedSeats.map((s) => s.label).join(",")
+          : "N/A",
+      total_amount: amountToPay,
     };
 
     try {
-      // Send payment request
-      const paymentRes = await axios.post(
-        "http://localhost:8081/api/payments",
-        paymentData
+      const resp = await axios.post(
+        "http://localhost:8081/api/bookings",
+        payload
       );
 
-      if (paymentRes.data.success) {
-        // Insert booking
-        const bookingData = {
-          user_id: userId,
-          show_id: movie?.id || item?.id,
-          seat_numbers: selectedSeats.join(",") || "N/A",
-          total_amount: finalTotal || totalFixed,
-          payment_status: "paid",
-        };
-
-        const bookingRes = await axios.post(
-          "http://localhost:8081/api/bookings",
-          bookingData
-        );
-
-        alert(
-          `✅ Payment & Booking successful! Booking ID: ${bookingRes.data.booking_id}`
-        );
+      if (resp.data?.success) {
+        alert(`✅ Booking successful! Booking ID: ${resp.data.booking_id}`);
         setIsPaid(true);
       } else {
-        alert("❌ Payment failed: " + paymentRes.data.message);
+        alert("❌ Failed to create booking");
       }
-    } catch (error) {
-      console.error("❌ Payment/Booking Error:", error);
-      alert("❌ Something went wrong. Please try again.");
+    } catch (err) {
+      console.error("Booking Error:", err);
+      const msg =
+        err?.response?.data?.message || err.message || "Something went wrong";
+      alert("❌ " + msg);
     }
   };
-
-  useEffect(() => {
-    setFinalTotal(totalFixed);
-  }, [totalFixed]);
 
   return (
     <div className="payment-card">
       <div className="bill-section">
         <h2>Booking Summary</h2>
+
         {movie ? (
           <>
             <p>
@@ -133,16 +130,19 @@ function PaymentCard({
           <span>Subtotal:</span>
           <span>₹{subtotalFixed.toFixed(2)}</span>
         </div>
+
         <div className="bill-item">
           <span>GST (18%):</span>
           <span>₹{gstFixed.toFixed(2)}</span>
         </div>
+
         {discount > 0 && (
           <div className="bill-item">
             <span>Discount:</span>
             <span>-₹{discount.toFixed(2)}</span>
           </div>
         )}
+
         <div className="bill-item total">
           <span>Grand Total:</span>
           <span>₹{(finalTotal || totalFixed).toFixed(2)}</span>
@@ -154,7 +154,7 @@ function PaymentCard({
             type="text"
             value={coupon}
             onChange={(e) => setCoupon(e.target.value.toUpperCase())}
-            placeholder="Enter offer code (e.g. MOVIE50)"
+            placeholder="Enter offer code"
           />
           <button onClick={applyCoupon}>Apply</button>
         </div>
@@ -166,6 +166,7 @@ function PaymentCard({
 
       <div className="payment-section">
         <h2>Select Payment Method</h2>
+
         <div className="method-buttons">
           <button
             className={method === "digital" ? "active" : ""}
@@ -173,6 +174,7 @@ function PaymentCard({
           >
             Digital
           </button>
+
           <button
             className={method === "card" ? "active" : ""}
             onClick={() => setMethod("card")}
@@ -186,20 +188,23 @@ function PaymentCard({
             <button className="qr-toggle" onClick={() => setShowQR(!showQR)}>
               {showQR ? "Hide QR" : "Show QR Code"}
             </button>
+
             {showQR && (
               <div className="qr-box">
                 <img src="/images/qr-sample.png" alt="QR" />
                 <p>Scan to Pay via UPI</p>
               </div>
             )}
+
             <div className="upi-box">
               <h3>Pay using UPI ID</h3>
               <input
                 type="text"
-                placeholder="Enter UPI ID (e.g. name@upi)"
+                placeholder="Enter UPI ID"
                 value={upiId}
                 onChange={(e) => setUpiId(e.target.value)}
               />
+
               <button
                 className="pay-btn"
                 onClick={handlePayment}
@@ -239,6 +244,7 @@ function PaymentCard({
                 onChange={(e) => setCvv(e.target.value)}
               />
             </div>
+
             <button
               className="pay-btn"
               onClick={handlePayment}

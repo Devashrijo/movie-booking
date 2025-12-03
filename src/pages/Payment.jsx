@@ -12,6 +12,7 @@ function Payment() {
   const itemSubtotal = item
     ? Number(item.price.replace(/[^\d.]/g, ""))
     : subtotal || 0;
+
   const itemGst = gst || itemSubtotal * 0.18;
   const itemTotal = total || itemSubtotal + itemGst;
 
@@ -19,7 +20,7 @@ function Payment() {
     <>
       <Header />
       <PaymentCard
-        userId={1} // Replace with logged-in user ID
+        userId={1}
         movie={movie}
         selectedSeats={selectedSeats || []}
         subtotal={itemSubtotal}

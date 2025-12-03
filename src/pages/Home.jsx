@@ -159,7 +159,7 @@ function Home() {
     <>
       <Header />
       <Hero movies={movieData} />
-      <QuickBook />
+      {/* <QuickBook /> */}
       <Tabs scrollToSection={scrollToSection} />
       <div ref={nowShowingRef}>
         <FilterBox title="Now Showing" showFilters={false} />
