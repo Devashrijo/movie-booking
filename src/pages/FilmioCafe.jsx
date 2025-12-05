@@ -1,5 +1,5 @@
 import FilmioHeroSection from "../components/FilmioHeroSection";
-import FilmioTopRecommendation from "../components/filmioTopRecommendation";
+import FilmioTopRecommendation from "../components/FilmioTopRecommendation";
 import Header from "../components/Header";
 import ShuffleCardSection from "../components/ShuffleCardsSection";
 import "./../App.css";
