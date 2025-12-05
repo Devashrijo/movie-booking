@@ -1,6 +1,6 @@
 import "./FilterBox.css";
 import { useState } from "react";
-import FilterDropdown from "./FilterDropDown";
+import FilterDropdown from "./FilterDropdown";
 
 const genres = ["Action", "Comedy", "Drama", "Horror", "Romance"];
 const languages = ["English", "Hindi", "Tamil", "Telugu", "Spanish"];
