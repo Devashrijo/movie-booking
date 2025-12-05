@@ -1,5 +1,6 @@
 import "./App.css";
 import { Routes, Route } from "react-router-dom";
+import { Navigate } from "react-router-dom";
 import BookShow from "./pages/BookShow";
 import TheaterBluePrint from "./pages/TheaterBluePrint";
 import Home from "./pages/Home";
@@ -13,6 +14,7 @@ import FilmioCafeOrders from "./pages/FilmioCafeOrders";
 function App() {
   return (
     <Routes>
+      <Route path="/" element={<Navigate to="/home" />} />
       <Route path="/home" element={<Home />} />
       <Route path="/bookshow" element={<BookShow />} />
       <Route path="/theater-blueprint" element={<TheaterBluePrint />} />
